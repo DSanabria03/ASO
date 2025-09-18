@@ -1,0 +1,7 @@
+\babel@toc {spanish}{}\relax 
+\contentsline {section}{\numberline {1}Instalación}{2}{section.1}%
+\contentsline {subsection}{\numberline {1.1}Clúster de Máquinas Virtuales}{2}{subsection.1.1}%
+\contentsline {subsection}{\numberline {1.2}Configuración de instalación}{2}{subsection.1.2}%
+\contentsline {subsection}{\numberline {1.3}Reconocimiento del entorno}{2}{subsection.1.3}%
+\contentsline {subsection}{\numberline {1.4}Acceso remoto vía ssh}{3}{subsection.1.4}%
+\contentsline {subsection}{\numberline {1.5}Activar cuenta root}{3}{subsection.1.5}%
