@@ -120,7 +120,14 @@
 		\end{enumerate}
 	\end{itemize}
 	\subsection{Acceso remoto vía ssh}
-	Se nos indica que el sistema ya tiene instalado y activado el servicio de conexión segura \verb|sshd| (que previamente hemos configurado en la configuración de la instalación) y para comprobar que funciona correctamente, me conectaré desde \verb|Jair| a esta máquina, usando la red de la UVa.
+	Se nos indica que el sistema ya tiene instalado y activado el servicio de conexión segura \verb|sshd| (que previamente hemos configurado en la configuración de la instalación) y para comprobar que funciona correctamente, me conectaré desde \verb|Jair| a esta máquina, usando la red de la UVa. Aquí se muestra una captura del proceso:
+	\begin{figure}[H]
+		\setlength{\abovecaptionskip}{0cm}
+		\setlength{\belowcaptionskip}{0cm}
+		\centering
+		\includegraphics[width=0.6\linewidth]{Recursos/ssh.png}
+		\label{fig:datos}
+	\end{figure}
 	\subsection{Activar cuenta root}
 	Lo siguiente que se indica es activar la cuenta \verb|root| cambiando su contraseña mediante \verb|sudo passwd root| e indicando una clave para ese usuario y así poder acceder a la consola directamente como \verb|root|.
 \end{document}
