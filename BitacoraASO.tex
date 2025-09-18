@@ -44,6 +44,8 @@
 	urlcolor=cyan,
 }
 
+\usepackage{url}
+
 % Encabezados y pies de página
 \usepackage{fancyhdr}
 \pagestyle{fancy}
@@ -130,4 +132,31 @@
 	\end{figure}
 	\subsection{Activar cuenta root}
 	Lo siguiente que se indica es activar la cuenta \verb|root| cambiando su contraseña mediante \verb|sudo passwd root| e indicando una clave para ese usuario y así poder acceder a la consola directamente como \verb|root|, ya que por defecto no trae ninguna contraseña y puede ser una brecha de seguridad.
+	\subsection{Trabajo No Presencial}
+	\begin{itemize}
+		\item \textbf{Administración de discos – particiones}: 
+		\begin{itemize}
+			\item Los discos duros o dispositivos de bloques, se dividen en unidades lógicas llamadas \textit{particiones}.\cite{Discos}
+			\item Una partición sirven organizan y almacenan el sistema operativo, las aplicaciones y los archivos personales. Existen diferentes esquemas de particiones para la distribución de particiones en un disco, como MBR o GPT.
+			\item Cada partición se representa como un archivo en el sistema de archivos de Linux y se encuentra ubicada en el directorio \verb|/dev|.
+		\end{itemize}
+		\item \textbf{Sistemas de archivos}: 
+		\begin{itemize}
+			\item Se organizan en una estructura jerárquica, de tipo árbol. El nivel más alto del sistema de ficheros es / o directorio raíz. Todos los demás ficheros y directorios están bajo el directorio raíz.\cite{Archivos}
+			\item Por debajo del directorio raíz (/) hay un importante grupo de directorios común a la mayoría de las distribuciones de GNU/Linux: \verb|/bin, /boot, /etc/, /opt, etc|.
+		\end{itemize}
+		\item \textbf{Actualización de un sistema operativo previamente instalado}:
+		\begin{itemize}
+			\item En el caso de nuestra máquina virtual, estamos trabajando con \verb|Ubuntu| que pertenece al grupo de distribuciones \verb|Debian|, por lo que para actualizar el sistema operativo una vez instalado se hará uso de la herramienta \verb|apt|.
+			\item \verb|apt| nos proporciona un sistema de gestión de paquetes donde maneja automáticamente las dependencias para la instalación de esos paquetes. Requiere de privilegios administrativos.\cite{Actualizar}
+			\item Para las actualizaciones será necesario usar los comandos \verb|sudo apt update| y \verb|sudo apt upgrade|.
+		\end{itemize}
+		\item \textbf{Identificación discos duros}:
+		\item \textbf{Sistema de ficheros}:
+		\item \textbf{RAID}:
+	\end{itemize}
+	
+	\clearpage
+	\bibliographystyle{plain}
+	\bibliography{bibliografia}
 \end{document}

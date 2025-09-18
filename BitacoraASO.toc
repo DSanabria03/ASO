@@ -5,3 +5,4 @@
 \contentsline {subsection}{\numberline {1.3}Reconocimiento del entorno}{2}{subsection.1.3}%
 \contentsline {subsection}{\numberline {1.4}Acceso remoto vía ssh}{3}{subsection.1.4}%
 \contentsline {subsection}{\numberline {1.5}Activar cuenta root}{3}{subsection.1.5}%
+\contentsline {subsection}{\numberline {1.6}Trabajo No Presencial}{4}{subsection.1.6}%

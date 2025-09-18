@@ -1,0 +1,23 @@
+\begin{thebibliography}{1}
+
+\bibitem{Archivos}
+Ubuntu.
+\newblock Guía de escritorio de kubuntu.
+\newblock
+  \url{https://help.ubuntu.com/kubuntu/desktopguide/es/directories-file-systems.html},
+  2006.
+
+\bibitem{Actualizar}
+Ubuntu.
+\newblock Guía de escritorio de kubuntu.
+\newblock \url{https://help.ubuntu.com/kubuntu/desktopguide/es/apt-get.html},
+  2006.
+
+\bibitem{Discos}
+Wikipedia.
+\newblock Gnu/linux.
+\newblock
+  \url{https://es.wikipedia.org/wiki/GNU/Linux#Discos,_particiones_y_sistemas_de_archivos},
+  2025.
+
+\end{thebibliography}
