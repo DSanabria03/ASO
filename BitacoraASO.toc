@@ -7,4 +7,8 @@
 \contentsline {subsection}{\numberline {1.5}Activar cuenta root}{3}{subsection.1.5}%
 \contentsline {subsection}{\numberline {1.6}Administración del disco}{4}{subsection.1.6}%
 \contentsline {subsubsection}{\numberline {1.6.1}Loop}{5}{subsubsection.1.6.1}%
-\contentsline {subsection}{\numberline {1.7}Trabajo No Presencial}{6}{subsection.1.7}%
+\contentsline {subsubsection}{\numberline {1.6.2}LVM}{6}{subsubsection.1.6.2}%
+\contentsline {subsection}{\numberline {1.7}Administración de almacenamiento}{7}{subsection.1.7}%
+\contentsline {subsubsection}{\numberline {1.7.1}RAID 5}{7}{subsubsection.1.7.1}%
+\contentsline {subsection}{\numberline {1.8}Nueva instalación personalizada}{8}{subsection.1.8}%
+\contentsline {subsection}{\numberline {1.9}Trabajo No Presencial}{9}{subsection.1.9}%

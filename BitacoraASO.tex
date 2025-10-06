@@ -186,7 +186,7 @@
 		\end{minipage}
 	\end{figure}
 	
-	\subsubsection{Loop}
+	\subsubsection{Loop} \label{loop}
 	Después, creamos un sistema de archivos o fichero dentro de un fichero nuevo:
 	\begin{enumerate}
 		\item Creamos el fichero mediante el comando \verb|dd|, donde se le indica los siguientes parámetros:\\
@@ -242,8 +242,98 @@
 	\subsubsection{LVM}
 	Llegados a este punto, se requiere volver a destruir las particiones existentes para crear y administrar volúmenes lógicos (LVM).
 	\begin{enumerate}
-		\item Primero necesitamos un volumen físico
+		\item Primero, modificamos la etiqueta de cada partición para marcar que es de tipo \verb|Linux LVM|. Desde la herramienta de \verb|fdisk|, seleccionamos cada partición del dispositivo \verb|loop0| y con la opción \verb|t|, escogemos el número 44 (en este caso que usamos una tabla de particiones de tipo \verb|GPT|).
+		\item Después, creamos el volumen físico en cada partición con \verb|pvcreate|:
+		\begin{figure}[H]
+			\setlength{\abovecaptionskip}{0cm}
+			\setlength{\belowcaptionskip}{0cm}
+			\centering
+			\includegraphics[width=0.6\linewidth]{Recursos/pvcreate.png}
+		\end{figure}
+		\item Lo siguiente, es crear un grupo de volúmenes físicos, con \verb|vgcreate|, donde agregamos los que hemos creado:
+		\begin{figure}[H]
+			\setlength{\abovecaptionskip}{0cm}
+			\setlength{\belowcaptionskip}{0cm}
+			\centering
+			\includegraphics[width=0.6\linewidth]{Recursos/vgcreate.png}
+		\end{figure}
+		\clearpage
+		\item Por último, creamos un par de volúmenes lógicos, con \verb|lvcreate|, sobre ese grupo que hemos creado en el punto anterior para después montarlo en el sistema:
+		\begin{figure}[H]
+			\setlength{\abovecaptionskip}{0cm}
+			\setlength{\belowcaptionskip}{0cm}
+			\centering
+			\includegraphics[width=0.6\linewidth]{Recursos/lvcreate.png}
+		\end{figure}
+		\item Una vez ya tenemos los volúmenes lógicos, los formateamos ambos para asignarles una estructura de directorios y los montamos en el directorio \verb|/mnt| para comprobar que se ha creado de forma correcta:
+		\begin{figure}[H]
+			\setlength{\abovecaptionskip}{0cm}
+			\setlength{\belowcaptionskip}{0cm}
+			\centering
+			\includegraphics[width=0.6\linewidth]{Recursos/mountLVM.png}
+		\end{figure}
+		\item Para acabar con este apartado, retornamos el sistema a su estado anterior desmontando y eliminando los volúmenes: 
+		\begin{figure}[H]
+			\setlength{\abovecaptionskip}{0cm}
+			\setlength{\belowcaptionskip}{0cm}
+			\centering
+			\includegraphics[width=0.6\linewidth]{Recursos/removeLVM.png}
+		\end{figure}
 	\end{enumerate}
+	
+	\subsection{Administración de almacenamiento}
+	\subsubsection{RAID 5}
+	Lo último que vamos a hacer antes de realizar una nueva instalación es crear y administrar un \verb|RAID 5| mediante software:
+	\begin{enumerate}
+		\item Lo primero es crear 3 nuevos dispositivos \verb|loop| de la misma manera que lo hemos hecho en el apartado \hyperref[sec:loop]{Loop}:
+		\begin{figure}[H]
+			\setlength{\abovecaptionskip}{0cm}
+			\setlength{\belowcaptionskip}{0cm}
+			\centering
+			\includegraphics[width=0.5\linewidth]{Recursos/fichRAID.png}
+		\end{figure}
+		Y después asociarlo a 3 dispositivos \verb|loop|:
+		\begin{figure}[H]
+			\setlength{\abovecaptionskip}{0cm}
+			\setlength{\belowcaptionskip}{0cm}
+			\centering
+			\includegraphics[width=0.5\linewidth]{Recursos/loopRAID.png}
+		\end{figure}
+		\item Consultando el manual para crear el dispositivo \verb|RAID|, tenemos que seleccionar el modo \verb|Create|, con las opciones de:
+		\begin{itemize}
+			\item \verb|level|: Indicando el tipo de \verb|RAID|.
+			\item \verb|raid-devices|: Número de dispositivos que usaremos.
+		\end{itemize}
+		\begin{figure}[H]
+			\setlength{\abovecaptionskip}{0cm}
+			\setlength{\belowcaptionskip}{0cm}
+			\centering
+			\includegraphics[width=0.6\linewidth]{Recursos/createRAID.png}
+		\end{figure}
+		\item Ahora repetimos el mismo procedimiento que con el resto de dispositivos de almacenamientos para formatearlos y darle un sistema de ficheros y montarlo:
+		\begin{figure}[H]
+			\setlength{\abovecaptionskip}{0cm}
+			\setlength{\belowcaptionskip}{0cm}
+			\centering
+			\includegraphics[width=0.6\linewidth]{Recursos/mountRAID.png}
+		\end{figure}
+	\end{enumerate}
+	Para comprobar que hemos configurado correctamente el disco, ejecutamos el comando \\ \verb|echo “Voy a destruir el disco!!!!” > fichero.img| donde \verb|fichero.img| es uno de los ficheros que da soporte al \verb|RAID| para hacerlo fallar y ver que sigue funcionando. Al lanzarlo, veo que no se destruye el disco y sigue activo, debido a que el fichero no es el disco como tal, por lo que no pasa nada. 
+	
+	\subsection{Nueva instalación personalizada}
+	Hasta ahora hemos trabajo con una configuración "por defecto" sobre la administración del disco de la máquina, teniendo únicamente dos particiones: \verb|/boot/efi| empleada para el arranque del sistema y \verb|/| para el resto de archivos del equipo. En un entorno real, tenemos más particiones para minimizar posibles fallos y errores, por lo que vamos a realizar una nueva instalación con las siguientes particiones:
+	\begin{itemize}
+		\item \verb|/boot/efi|: Contiene los ficheros para el arranque del sistema y tiene un espacio de \verb|1.049G|, que es lo que ocupaba inicialmente y no se puede modificar. El formato que tiene es \verb|fat32|, bastante antiguo y limitado, pero compatible con muchos dispositivos.
+		\item \verb|/|: Destinado a todos los ficheros para el sistema operativo y con un espacio de \verb|40G| para que no haya problemas a la hora de agregar elementos al sistema.
+		\item \verb|swap|: Con un espacio de \verb|1.448G|, solo actúa en caso de que la memoria RAM se quede sin espacio.
+		\item \verb|/home|: Dedicada al espacio personal del usuario que ocupa el resto del espacio restante del disco.
+	\end{itemize}
+	\begin{figure}[H]
+		\setlength{\abovecaptionskip}{0cm}
+		\setlength{\belowcaptionskip}{0cm}
+		\centering
+		\includegraphics[width=0.6\linewidth]{Recursos/nuevaInstalacion.png}
+	\end{figure}
 	
 	\subsection{Trabajo No Presencial}
 	\begin{itemize}
