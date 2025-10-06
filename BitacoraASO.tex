@@ -318,14 +318,17 @@
 			\includegraphics[width=0.6\linewidth]{Recursos/mountRAID.png}
 		\end{figure}
 	\end{enumerate}
-	Para comprobar que hemos configurado correctamente el disco, ejecutamos el comando \\ \verb|echo “Voy a destruir el disco!!!!” > fichero.img| donde \verb|fichero.img| es uno de los ficheros que da soporte al \verb|RAID| para hacerlo fallar y ver que sigue funcionando. Al lanzarlo, veo que no se destruye el disco y sigue activo, debido a que el fichero no es el disco como tal, por lo que no pasa nada. 
+	Para comprobar que hemos configurado correctamente el disco, ejecutamos el comando \\ \verb|echo “Voy a destruir el disco!!!!” > fichero.img| donde \verb|fichero.img| es uno de los ficheros que da soporte al \verb|RAID| para hacerlo fallar y ver que sigue funcionando. Al lanzarlo, veo que no se destruye el disco y sigue activo, debido a que solo estoy modificando el fichero que da soporte al dispositivo y no cambia al propio disco. 
 	
 	\subsection{Nueva instalación personalizada}
 	Hasta ahora hemos trabajo con una configuración "por defecto" sobre la administración del disco de la máquina, teniendo únicamente dos particiones: \verb|/boot/efi| empleada para el arranque del sistema y \verb|/| para el resto de archivos del equipo. En un entorno real, tenemos más particiones para minimizar posibles fallos y errores, por lo que vamos a realizar una nueva instalación con las siguientes particiones:
 	\begin{itemize}
 		\item \verb|/boot/efi|: Contiene los ficheros para el arranque del sistema y tiene un espacio de \verb|1.049G|, que es lo que ocupaba inicialmente y no se puede modificar. El formato que tiene es \verb|fat32|, bastante antiguo y limitado, pero compatible con muchos dispositivos.
-		\item \verb|/|: Destinado a todos los ficheros para el sistema operativo y con un espacio de \verb|40G| para que no haya problemas a la hora de agregar elementos al sistema.
-		\item \verb|swap|: Con un espacio de \verb|1.448G|, solo actúa en caso de que la memoria RAM se quede sin espacio.
+		\item \verb|/|: Destinado a todos los ficheros para el sistema operativo y con un espacio de \verb|15G| para que no haya problemas a la hora de agregar elementos al sistema.
+		\item \verb|swap|: Con un espacio de \verb|1G|, solo actúa en caso de que la memoria RAM se quede sin espacio. No es necesario añadir nada más ya que el sistema ya cuenta con 6GB de RAM.
+		\item \verb|/usr|: Donde se ubica los programas y librerías instaladas, por lo que es necesario \verb|15G| de almacenamiento.
+		\item \verb|/var|: Lugar donde se ubican los ficheros como logs y colas. No es necesario dar mucho tamaño, por lo que se le asignan \verb|3GB|.
+		\item \verb|/tmp|: Contiene archivos temporales y es necesario separarlo para que en caso de que se ocupe por completo, no bloquee el sistema. Solo es necesario \verb|5G|.
 		\item \verb|/home|: Dedicada al espacio personal del usuario que ocupa el resto del espacio restante del disco.
 	\end{itemize}
 	\begin{figure}[H]
@@ -374,6 +377,12 @@
 	\end{itemize}
 	
 	\clearpage
+	
+	\section{Administración de usuarios y servicios}
+	
+	
+	\clearpage
+	
 	\bibliographystyle{plain}
 	\bibliography{bibliografia}
 \end{document}
