@@ -132,7 +132,6 @@
 		\setlength{\belowcaptionskip}{0cm}
 		\centering
 		\includegraphics[width=0.6\linewidth]{Recursos/ssh.png}
-		\label{fig:datos}
 	\end{figure}
 	
 	\subsection{Activar cuenta root}
@@ -211,7 +210,6 @@
 		\setlength{\belowcaptionskip}{0cm}
 		\centering
 		\includegraphics[width=0.6\linewidth]{Recursos/loop0.png}
-		\label{fig:loop}
 	\end{figure}
 	
 	Cuando tengamos el dispositivo de disco \verb|Loop|, nos piden administrar ñas particiones en ese dispositivo:
@@ -379,7 +377,76 @@
 	\clearpage
 	
 	\section{Administración de usuarios y servicios}
+	\subsection{Gestión de usuarios y grupos}
+	Para comprobar si la clave de nuestro usuario y el resto de usuarios está encriptada, tenemos que ver si en el fichero \verb|/etc/passwd|, dedicado a recopilar la información de un usuario, en el segundo campo aparece escrita la clave o se muestra en su lugar el carácter \verb|'x'|. Con solo lanzar un \verb|cat| a ese fichero, descubrimos que cada usuario tiene su clave encriptada:
+	\begin{figure}[H]
+		\setlength{\abovecaptionskip}{0cm}
+		\setlength{\belowcaptionskip}{0cm}
+		\centering
+		\includegraphics[width=0.6\linewidth]{Recursos/passwd.png}
+	\end{figure}
+	Con esto concluimos que se está usando el fichero \verb|/etc/shadow| para contener la clave encriptada.\\\\
+	Creamos dos nuevos grupos de usuario con \verb|addgroup| y dos usuarios para cada grupo con \verb|useradd|, para crearlos, y \verb|adduser|, para agregarlo a uno de los grupos:
+	\begin{figure}[H]
+		\centering
+		\begin{minipage}{0.48\textwidth}
+			\centering
+			\includegraphics[width=\linewidth]{Recursos/userNuevos.png}
+		\end{minipage}\hfill
+		\begin{minipage}{0.48\textwidth}
+			\centering
+			\includegraphics[width=\linewidth]{Recursos/groupNuevos.png}
+		\end{minipage}
+	\end{figure}
+	Tras la creación de los nuevos usuarios y grupos, volvemos a ver el contenido del fichero \verb|/etc/passwd| y también de \verb|/etc/group|, que contiene información de cada grupo y los usuarios que hay dentro de él:
+	\begin{figure}[H]
+		\centering
+		\begin{minipage}{0.48\textwidth}
+			\centering
+			\includegraphics[width=\linewidth]{Recursos/passwdNuevo.png}
+		\end{minipage}\hfill
+		\begin{minipage}{0.48\textwidth}
+			\centering
+			\includegraphics[width=\linewidth]{Recursos/groupNuevo.png}
+		\end{minipage}
+	\end{figure}
+	Y para el \verb|password| de cada usuario, lo recomendable es seguir estos consejos:
+	\begin{itemize}
+		\item \textbf{Longitud de la contraseña}: Debería haber entre 12 y 16 caracteres.
+		\item \textbf{Uso de distintos tipos de caracteres}: Mezclar entre símbolos y letras mayúsculas y minúsculas, incluso números.
+		\item \textbf{No utilizar secuencias conocidas}.
+	\end{itemize}
+	La siguiente tarea es tener una estructura de directorios/ficheros tipo en el directorio \verb|/etc/skel|, encargado de otorgar esa jerarquía al directorio \verb|/home/<user>|. Decidí dar una estructura parecida a la que otorga \verb|Ubuntu Desktop| en su instalación, usando \verb|mkdir|: 
+	\begin{itemize}
+		\item Downloads
+		\item Documents
+		\item Images
+		\item Desktop
+	\end{itemize}
+	Al crear otro par de usuarios y agregarlos cada uno a los grupos nuevos, la estructura de ficheros de sus directorios \verb|/home| tendrá esa jerarquía:
+	\begin{figure}[H]
+		\setlength{\abovecaptionskip}{0cm}
+		\setlength{\belowcaptionskip}{0cm}
+		\centering
+		\includegraphics[width=0.6\linewidth]{Recursos/skel.png}
+	\end{figure}
+	\clearpage
 	
+	\subsection{Gestión de password}
+	Se puede establecer una fecha de caducidad a la contraseña de un usuario y de su cuenta con el comando \verb|chage| que estable dicho atributo. Hay que tener en cuenta que el sistema está 2 horas retrasado de la hora real (se puede comprobar con el comando \verb|date|). Para la contraseña, hay que usar la opción \verb|-M| para indicar el máximo de días que tiene esa contraseña antes de caducar, y la opción \verb|-E| indica la fecha tope de ese usuario:
+	\begin{figure}[H]
+		\setlength{\abovecaptionskip}{0cm}
+		\setlength{\belowcaptionskip}{0cm}
+		\centering
+		\includegraphics[width=0.7\linewidth]{Recursos/chage.png}
+	\end{figure}
+	Para comprobar que funciona, podemos verlo en el fichero \verb|/etc/shadow| ya que al tener la información de las claves de los usuarios, se indica también cuando es su fecha de espiración:
+	\begin{figure}[H]
+		\setlength{\abovecaptionskip}{0cm}
+		\setlength{\belowcaptionskip}{0cm}
+		\centering
+		\includegraphics[width=\linewidth]{Recursos/shadowChage.png}
+	\end{figure}
 	
 	\clearpage
 	
