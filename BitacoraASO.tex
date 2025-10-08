@@ -316,7 +316,7 @@
 			\includegraphics[width=0.6\linewidth]{Recursos/mountRAID.png}
 		\end{figure}
 	\end{enumerate}
-	Para comprobar que hemos configurado correctamente el disco, ejecutamos el comando \\ \verb|echo “Voy a destruir el disco!!!!” > fichero.img| donde \verb|fichero.img| es uno de los ficheros que da soporte al \verb|RAID| para hacerlo fallar y ver que sigue funcionando. Al lanzarlo, veo que no se destruye el disco y sigue activo, debido a que solo estoy modificando el fichero que da soporte al dispositivo y no cambia al propio disco. 
+	Para comprobar que hemos configurado correctamente el disco, ejecutamos el comando \\ \verb|echo “Voy a destruir el disco!!!!” > fichero.img| donde \verb|fichero.img| es uno de los ficheros que da soporte al \verb|RAID| para hacerlo fallar y ver que sigue funcionando. Al lanzarlo, veo que no se destruye el disco y sigue activo, debido a que el dispositivo \verb|RAID 5| está montado y funcionando. Entonces, lo que hay que hacer es reiniciar la máquina para que deje de estar en funcionamiento y lanzar el comando. 
 	
 	\subsection{Nueva instalación personalizada}
 	Hasta ahora hemos trabajo con una configuración "por defecto" sobre la administración del disco de la máquina, teniendo únicamente dos particiones: \verb|/boot/efi| empleada para el arranque del sistema y \verb|/| para el resto de archivos del equipo. En un entorno real, tenemos más particiones para minimizar posibles fallos y errores, por lo que vamos a realizar una nueva instalación con las siguientes particiones:
