@@ -448,6 +448,128 @@
 		\includegraphics[width=\linewidth]{Recursos/shadowChage.png}
 	\end{figure}
 	
+	\subsection{Gestión avanzada de grupos}
+	Nos piden que uno de los nuevos usuarios creados forme parte de un de los dos grupos. Compruebo viendo el fichero \verb|/etc/group| que cada usuario está asignado a un grupo, por lo que únicamente habrá usar \verb|usermod| con las opciones \verb|-aG| para añadir a ese usuario a un grupo a mayores. En mi caso lo pruebo con el usuario \verb|user4|.
+	\begin{figure}[H]
+		\setlength{\abovecaptionskip}{0cm}
+		\setlength{\belowcaptionskip}{0cm}
+		\centering
+		\includegraphics[width=0.6\linewidth]{Recursos/user2group.png}
+	\end{figure}
+	Una de las ventajas de tener un usuario en varios grupos puede darse a la hora de asignar permisos sobre un recurso compartido, ya que un solo usuario puede tener acceso y privilegios a recursos de ambos grupos.
+	\begin{figure}[H]
+		\setlength{\abovecaptionskip}{0cm}
+		\setlength{\belowcaptionskip}{0cm}
+		\centering
+		\includegraphics[width=0.7\linewidth]{Recursos/ejemploGroup.png}
+	\end{figure}
+	
+	\subsection{Perfiles de usuario}
+	En este apartado, se pide modificar la configuración del editor de texto \verb|vi|, de forma que para uno de los usuarios creados (por ejemplo \verb|user4|) se realicen dos operaciones automáticamente cuando se abra el programa, por lo que será necesario modificar el archivo con la configuración de este editor.\\\\
+	Como ya se ha comentado en la instalación, estamos usando \verb|Ubuntu Server 24| en nuestras máquinas virtuales y, consultando la información en foros \cite{rcfile}, en sistemas modernos, utiliza el mismo fichero de configuración que \verb|vim| que es \verb|.vimrc|, porque el comando \verb|vi| es un enlace simbólico al editor \verb|vim|.
+	\begin{figure}[H]
+		\setlength{\abovecaptionskip}{0cm}
+		\setlength{\belowcaptionskip}{0cm}
+		\centering
+		\includegraphics[width=0.8\linewidth]{Recursos/viVim.png}
+	\end{figure}
+	En \verb|/home/user4|, no existe ese fichero de configuración, por lo que habrá que crearlo y agregar las opciones requeridas.
+	\begin{itemize}
+		\item Para la auto-sangría, tenemos que activar la opción \verb|autoindent|.
+		\item Y para un máximo de 75 caracteres con un salto de línea, la opción \verb|textwidth=75 linebreak|.
+	\end{itemize}
+	\begin{figure}[H]
+		\setlength{\abovecaptionskip}{0cm}
+		\setlength{\belowcaptionskip}{0cm}
+		\centering
+		\includegraphics[width=0.8\linewidth]{Recursos/vimrc.png}
+	\end{figure}
+	Las dos últimas líneas son configuración adicional que he añadido para agregar color al texto y que aparezcan los números de línea por pantalla.
+	\begin{figure}[H]
+		\setlength{\abovecaptionskip}{0cm}
+		\setlength{\belowcaptionskip}{0cm}
+		\centering
+		\includegraphics[width=0.8\linewidth]{Recursos/pruebaVi.png}
+	\end{figure}
+	\clearpage
+	
+	Finalizado esta primera personalización, ahora nos piden que cada vez que el usuario inicie sesión, se muestre el contenido de \verb|$HOME/docs/Agenda.txt|. Haciendo uso de \verb|Shell scripting|, modificamos el fichero \verb|.profile| porque es el que se ejecuta cuando se inicia sesión en un usuario:
+	\begin{figure}[H]
+		\setlength{\abovecaptionskip}{0cm}
+		\setlength{\belowcaptionskip}{0cm}
+		\centering
+		\includegraphics[width=0.7\linewidth]{Recursos/profile.png}
+	\end{figure}
+	Reiniciando, veremos lo que hay escrito en \verb|Agenda.txt| ubicado en la última línea de todo el contenido que se muestra tras iniciar sesión.
+	\begin{figure}[H]
+		\setlength{\abovecaptionskip}{0cm}
+		\setlength{\belowcaptionskip}{0cm}
+		\centering
+		\includegraphics[width=0.7\linewidth]{Recursos/inicioProfile.png}
+	\end{figure}
+	\clearpage
+	
+	También, se requiere que cunado el usuario abre un \verb|shell|, se muestre la fecha y hora del último login. En este caso, el fichero \verb|.bashrc| es el que contiene la configuración de cualquier \verb|shell|. Al final del fichero, agregamos \verb|lastlog -u "$USER"| con \verb|tail -n 1|, donde \verb|lastlog| es el comando que muestra el login más reciente de un usuario y \verb|tail| es para mostrar solo la última línea del registro.
+	\begin{figure}[H]
+		\setlength{\abovecaptionskip}{0cm}
+		\setlength{\belowcaptionskip}{0cm}
+		\centering
+		\includegraphics[width=0.7\linewidth]{Recursos/bashrc.png}
+	\end{figure}
+	Al estar una máquina virtual, no estamos interactuando con una \verb|tty|  "real", por lo que nunca se registrará el inicio de sesión.
+	\begin{figure}[H]
+		\setlength{\abovecaptionskip}{0cm}
+		\setlength{\belowcaptionskip}{0cm}
+		\centering
+		\includegraphics[width=0.7\linewidth]{Recursos/lastlog.png}
+	\end{figure}
+	Y, finalmente, la última personalización es que cada vez que se cierre sesión, se muestre un mensaje de despedida y solo se cierre sesión tras haber respondido al mensaje. Al hacer \verb|logout|, el sistema ejecuta el fichero \verb|.bash_logout| con todas las instrucciones que contiene. Por ello, modificamos dicho archivo para que mediante un \verb|echo| muestre el mensaje y se quede esperando con un \verb|read|:
+	\begin{figure}[H]
+		\setlength{\abovecaptionskip}{0cm}
+		\setlength{\belowcaptionskip}{0cm}
+		\centering
+		\includegraphics[width=0.7\linewidth]{Recursos/logout.png}
+	\end{figure}
+	\begin{figure}[H]
+		\setlength{\abovecaptionskip}{0cm}
+		\setlength{\belowcaptionskip}{0cm}
+		\centering
+		\includegraphics[width=0.7\linewidth]{Recursos/logout1.png}
+	\end{figure}
+	\clearpage
+	
+	\subsection{Servicios del sistema}
+	En este apartado, se trabajará acerca de los servicios que hay en el sistema, destacando el de conexión segura o \verb|ssh|. Para comprobar los servicios activos, lanzamos el comando \\ \verb|systemctl list-units --type=service --state=running| donde señalamos que en el listado de servicios nos interesa aquellos que están activos:
+	\begin{figure}[H]
+		\setlength{\abovecaptionskip}{0cm}
+		\setlength{\belowcaptionskip}{0cm}
+		\centering
+		\includegraphics[width=0.7\linewidth]{Recursos/activeProcess.png}
+	\end{figure}
+	Cada proceso nos indica el nombre (\verb|UNIT|), si está cargado en el sistema (\verb|LOAD|), si está activo (\verb|ACTIVE|), su estado (\verb|SUB|) y una descripción (\verb|DESCRIPTION|). Observando la lista, vemos que no aparece el servicio \verb|ssh| porque está inactivo:
+	\begin{figure}[H]
+		\setlength{\abovecaptionskip}{0cm}
+		\setlength{\belowcaptionskip}{0cm}
+		\centering
+		\includegraphics[width=0.8\linewidth]{Recursos/statusSSH.png}
+	\end{figure}
+	Vemos que está desactivado, por lo que habrá que activarlo con \verb|sudo systemctl enable ssh|, después se para con el mismo comando pero usando \verb|stop| en vez de \verb|enable|, y se iniciará con \verb|start|.
+	\begin{figure}[H]
+		\setlength{\abovecaptionskip}{0cm}
+		\setlength{\belowcaptionskip}{0cm}
+		\centering
+		\includegraphics[width=0.7\linewidth]{Recursos/sshService.png}
+	\end{figure}
+	Es esencial tener un equipo con los servicios esenciales activos y desactivar aquellos que no tienen mucha relevancia, ya que consumen recursos innecesarios y pueden llegar a ser un riesgo en la seguridad. Investigando el listado de servicios que hay activos en mi máquina, hay ciertos servicios que se pueden quitar como \verb|ModemManager.servicie| debido a que solo se emplea para la gestión de módems 3G/4G.\\\\
+	Y para terminar con esta sección, nos piden que el sistema desde el arranque vaya al nivel de ejecución 3 (\verb|runlevel3|), es decir sin entorno gráfico y solo en modo texto con red. Dependiendo de cada \verb|runlevel| entre 1 y 5, Linux se ejecutará de una forma distinta. Para arrancar como ese nivel de ejecución \verb|sudo systemctl set-default multi-user.target|
+	\begin{figure}[H]
+		\setlength{\abovecaptionskip}{0cm}
+		\setlength{\belowcaptionskip}{0cm}
+		\centering
+		\includegraphics[width=0.9\linewidth]{Recursos/runlevel.png}
+	\end{figure}
+	
+	
 	\clearpage
 	
 	\bibliographystyle{plain}
