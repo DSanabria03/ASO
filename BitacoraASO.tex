@@ -569,6 +569,155 @@
 		\includegraphics[width=0.9\linewidth]{Recursos/runlevel.png}
 	\end{figure}
 	
+	\subsection{Permisos de acceso}
+	Vamos a aprender acerca de cómo funcionan los permisos en sistemas Linux \cite{umask}. En los sistemas operativos tipo \verb|POSIX| cada elemento del sistema de archivos tiene la característica de poseer permisos que lo ubican dentro del mismo. Éstos sirven como uno más de los niveles de seguridad del sistema operativo al impedir que cualquier usuario pueda leer, escribir, ejecutar o acceder a dichos archivos y directorios de manera arbitraria. Estos permisos vistos de manera básica son: lectura (r, \verb|read|), escritura (w, \verb|write|) y ejecución (x, \verb|execution|) y se agrupan en bloques (\verb|rwx|) para 3 diferentes clases (usuario, grupo y otros).\\\\
+	Por defecto, cuando se crea un elemento en el sistema de fichero, se le asignará unos permisos dependiendo del objeto creado. \verb|umask| es una función que establece los permisos predeterminados para los nuevos archivos y directorios creados en el sistema. El valor de la máscara de usuario, que se asigna ejecutando \verb|umask|, corresponde a los bits contrarios del permiso predeterminado que se quiera asignar. Es decir, si por ejemplo se quiere asignar una máscara de usuario equivalente a 0775 (\verb|rwxrwxr-x|), el valor de la máscara de usuario corresponderá a 0002 (el resultado de la operación 777 menos 775), que será lo mismo que definir \verb|u=rwx,g=rwx,o=rx|. En este caso, para lograr que cuando se cree un fichero tenga los permisos 550, tenemos que saber que los permisos por defecto son 664 y realizar el siguiente cálculo: \verb|550 = 664 - umask|. El resultado de \verb|umask| es 114 en octal. Para aplicarlo a todos los usuarios, tenemos que agregar al final del fichero \verb|/etc/profile| esta línea \verb|umask 114|.
+	\begin{figure}[H]
+		\centering
+		\begin{minipage}{0.48\textwidth}
+			\centering
+			\includegraphics[width=\linewidth]{Recursos/etcProfile.png}
+		\end{minipage}\hfill
+		\begin{minipage}{0.48\textwidth}
+			\centering
+			\includegraphics[width=\linewidth]{Recursos/umaskPrueba.png}
+		\end{minipage}
+	\end{figure}
+	\clearpage
+	
+	Acerca del bit \verb|SetUID|, es un permiso especial que hace que cuando se ha establecido ejecución, el proceso resultante asumirá la identidad del usuario dado en la clase de usuario (propietario del elemento). Corresponde al primer dígito del conjunto octal de permisos de los cuatro que hay. Un ejemplo para ver cómo funciona sería creando un programa en C que me indique cuál es el valor del \verb|UID| efectivo (permisos con los que ejecuta el usuario) y real (permisos de ejecución reales de ese usuario).
+	\begin{figure}[H]
+		\setlength{\abovecaptionskip}{0cm}
+		\setlength{\belowcaptionskip}{0cm}
+		\centering
+		\includegraphics[width=0.9\linewidth]{Recursos/muestraUID.png}
+	\end{figure}
+	Ahora, le otorgamos permisos a \verb|root| para comprobar cómo varía el valor del \verb|UID|:
+	\begin{figure}[H]
+		\setlength{\abovecaptionskip}{0cm}
+		\setlength{\belowcaptionskip}{0cm}
+		\centering
+		\includegraphics[width=0.7\linewidth]{Recursos/rootUID.png}
+	\end{figure}
+	
+	\subsection{Listas de acceso de control}
+	Volvemos a crear dos usuarios nuevos y lo asignamos cada uno a un grupo nuevo distinto, de la misma manera que se ha hecho al comienzo de esta sección. Iniciando sesión en el \verb|userA|, creamos el directorio con solo permisos de lectura y acceso, el cuál va a contener un fichero con solo permiso de lectura para el usuario \verb|root|.\\\\
+	Ahora, mediante el uso de la utilidad \verb|ACL|, damos permisos de lectura únicamente al usuario \verb|userB| con el comando \verb|sudo setfacl -m u:userB:r /home/userA/dirNuevo/fichUserA.txt| donde indicamos con la opción \verb|-m| que se quiere modificar la \verb|ACL| del fichero y señalamos el usuario que obtiene esos permisos:
+	\begin{figure}[H]
+		\setlength{\abovecaptionskip}{0cm}
+		\setlength{\belowcaptionskip}{0cm}
+		\centering
+		\includegraphics[width=0.7\linewidth]{Recursos/userA.png}
+	\end{figure}
+	\begin{figure}[H]
+		\setlength{\abovecaptionskip}{0cm}
+		\setlength{\belowcaptionskip}{0cm}
+		\centering
+		\includegraphics[width=0.7\linewidth]{Recursos/setfaclUserB.png}
+	\end{figure}
+	\textbf{NOTA}: La utilidad no viene instalada en la máquina, hay que instalarla con \verb|sudo apt install acl|.
+	\clearpage
+	
+	\subsection{Cuota de disco}
+	Se trata de un límite establecido por el administrador del sistema que restringe ciertos aspectos del uso del sistema de archivos en los sistemas operativos modernos. El objetivo de la utilización de las cuotas de disco es limitar la asignación de espacio en el disco duro de una manera razonable \cite{quota}. Para activarla, tenemos que seguir estos pasos\cite{disk_quota}:
+	\begin{enumerate}
+		\item Instalamos la herramienta con el comando \verb|sudo apt install quota|.
+		\item Una vez instalada, tenemos que editar el fichero \verb|/etc/fstab|, para activar las opciones de cuota en la partición \verb|/home|, tanto del usuario como para el grupo.
+		\begin{figure}[H]
+			\setlength{\abovecaptionskip}{0cm}
+			\setlength{\belowcaptionskip}{0cm}
+			\centering
+			\includegraphics[width=0.7\linewidth]{Recursos/fstabQuota.png}
+		\end{figure}
+		\item Remontamos la partición con \verb|mount -o remount /home| y reiniciamos los servicios demonios con \\ \verb|sudo systemctl daemon-reload|.
+		\item Creamos el fichero con el índice de cuota con \verb|quotacheck -cum /home| y lo activamos con \verb|quotaon -v /home|.
+		\begin{figure}[H]
+			\setlength{\abovecaptionskip}{0cm}
+			\setlength{\belowcaptionskip}{0cm}
+			\centering
+			\includegraphics[width=0.9\linewidth]{Recursos/quotaOn.png}
+		\end{figure}
+		Aparece un mensaje de aviso sobre el tipo de cuotas que puede ser ignorado ya que funciona sin problemas.
+		\item Revisamos la configuración de las cuotas de cada usuario con \verb|edquota|, en el que aparece las columnas \verb|soft limit| o límite blando que se puede sobrepasar temporalmente, y \verb|hard limit| o límite duro que indica que no se puede sobrepasar ese límite:
+		\begin{figure}[H]
+			\setlength{\abovecaptionskip}{0cm}
+			\setlength{\belowcaptionskip}{0cm}
+			\centering
+			\includegraphics[width=0.9\linewidth]{Recursos/quotaDansana.png}
+			\caption{Cuota dansana}
+		\end{figure}
+	\end{enumerate}
+	Un ejemplo donde se puede ver perfectamente su funcionamiento es modificando uno de los ficheros anteriores de los usuarios y estableciendo un límite de cuota tanto duro como blando, y ocupando el espacio disponible hasta ver el mensaje de \verb|Disk quota exceeded|. Para el límite blando, se nos otorga un periodo de 7 días hasta bloquear la escritura en disco.
+	
+	\subsection{Autoría /tmp}
+	La auditoría no proporciona seguridad adicional a su sistema; más bien, puede utilizarse para descubrir violaciones de las políticas de seguridad utilizadas en su sistema. Por ello, para realizar este tipo de operaciones, la herramienta \verb|audit| que nos muestra esta información acerca de cualquier evento:
+	\begin{itemize}
+		\item Instalamos el servicio con \verb|sudo apt install auditd| y lo arrancamos tal y como hemos visto en el apartado de \verb|Servicios del sistema|.
+		\item Después, creamos una nueva regla de auditoría para ese directorio con el comando \\ \verb|sudo auditctl -w /tmp -p rwxa|, donde se indica la carpeta a auditar y las operaciones que se auditan. Comprobamos que se ha agregado correctamente con \verb|sudo auditctl -l|.
+		\begin{figure}[H]
+			\setlength{\abovecaptionskip}{0cm}
+			\setlength{\belowcaptionskip}{0cm}
+			\centering
+			\includegraphics[width=0.7\linewidth]{Recursos/auditoriaTMP.png}
+		\end{figure}
+		\item Por último, realizaremos una prueba para ver cuál es contenido del reporte tras crear un fichero en ese directorio y ver su contenido:
+		\begin{figure}[H]
+			\setlength{\abovecaptionskip}{0cm}
+			\setlength{\belowcaptionskip}{0cm}
+			\centering
+			\includegraphics[width=0.7\linewidth]{Recursos/testAudit.png}
+		\end{figure}
+		El resultado se puede ver en la última línea, que aparece repetida debido a una comprobación anterior del reporte.
+	\end{itemize}
+	
+	\subsection{Copia de seguridad}
+	\subsubsection{dump}
+	Consultando el manual, esta herramienta trabaja con sistemas de ficheros \verb|ext2, ext3, ext4| examinado su contenido y determinando qué archivos son necesarios hacer \verb|backup|. Se pueden almacenar tanto en el propio disco como en un medio externo. Después, para recuperar el \verb|backup|, la herramienta que se debe utilizar es \verb|restore| pasando como argumento el fichero \verb|backup|.\\\\
+	Existen diferentes opciones a tener en cuenta para realizar la copia de seguridad:
+	\begin{itemize}
+		\item \textbf{-level}: Nivel de la copia, siendo 0 un copia completo del sistema de ficheros.
+		\item \textbf{-f}: El fichero donde queremos tener la copia de seguridad.
+		\item \textbf{-u}: Actualiza el historial de copias \verb|/etc/dumpdates|.
+		\item \textbf{-z}: Activación del modo compresión de la copia.
+	\end{itemize}
+	\begin{figure}[H]
+		\setlength{\abovecaptionskip}{0cm}
+		\setlength{\belowcaptionskip}{0cm}
+		\centering
+		\includegraphics[width=0.6\linewidth]{Recursos/dump.png}
+	\end{figure}
+	
+	\subsubsection{tar}
+	Conocida herramienta para empaquetar y comprimir archivos o directorios en un fichero. Añadir que con el mismo comando podemos también desempaquetar y restaurar los archivos en los discos. Con \verb|tar| podemos preservar los metadatos de los archivos originales, permisos, propiedad o enlaces simbólicos. Esto es muy importante a la hora de realizar copias de seguridad o permitir restaurar los contenidos respetando sus propiedades originales.\\\\
+	Las \verb|flags| más utilizadas son las siguientes:
+	\begin{itemize}
+		\item \textbf{-c}: Indica la creación de un archivo.
+		\item \textbf{-v}: Muestra todo lo que se está empaquetando.
+		\item \textbf{-f}: Especifica el nombre del archivo comprimido.
+		\item \textbf{-x}: Indica que se quiere extraer. 
+	\end{itemize}
+	\begin{figure}[H]
+		\setlength{\abovecaptionskip}{0cm}
+		\setlength{\belowcaptionskip}{0cm}
+		\centering
+		\includegraphics[width=0.9\linewidth]{Recursos/tar.png}
+	\end{figure}
+	
+	\subsubsection{rsync}
+	Es una herramienta de sincronización de archivos local y remota, de forma que podemos transferir ficheros de manera eficiente. Utiliza el algoritmo de transferencia delta que minimiza la transferencia de datos al copiar solo las secciones de un archivo que se han actualizado. Admite la copia de enlaces, dispositivos, propietarios, grupos y permisos.\\\\
+	Los parámetros más comunes son:
+	\begin{itemize}
+		\item \textbf{-t}: Indicamos que es de forma recursiva.
+		\item \textbf{-a}: Para copiar recursivamente en un directorio, con el añadido de mantener privilegios, permisos y fechas de los ficheros y directorios.
+		\item \textbf{-z}: Copiado de forma comprimida.
+		\item \textbf{-t}: Preservamos el tiempo de modificación de los archivos.
+	\end{itemize}
+	\begin{figure}[H]
+		\setlength{\abovecaptionskip}{0cm}
+		\setlength{\belowcaptionskip}{0cm}
+		\centering
+		\includegraphics[width=0.9\linewidth]{Recursos/rsync.png}
+	\end{figure}
 	
 	\clearpage
 	
