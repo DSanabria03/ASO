@@ -718,6 +718,77 @@
 		\centering
 		\includegraphics[width=0.9\linewidth]{Recursos/rsync.png}
 	\end{figure}
+	\clearpage
+	
+	\section{Autenticación. Seguridad. Control de Servicios.}
+	\subsection{PAM}
+	En Linux, la autenticación de los usuarios en el sistema está estandarizado mediante el uso de \verb|PAM|. Proporciona un mecanismo para añadir autenticación a los programas mediante el uso de llamadas a las bibliotecas de funciones \verb|PAM|.\\
+	El uso de diferentes módulos para cada servicio facilita que cada uno de ellos no tenga que implementar el mecanismo de acceso, sino simplemente pasar las credenciales a \verb|PAM| y este se encargue de indicar si el usuario tiene acceso a no.
+	
+	\subsubsection{Claves fuertes}
+	El comando \verb|passwd| es uno de los que sí usan \verb|PAM| a la hora de crear las contraseñas, ya que en vez comunicarse con los ficheros \verb|/etc/passwd| y \verb|/etc/shadow|, hace una llamada al sistema \verb|PAM| y recibe las instrucciones del fichero \verb|/etc/pam.d/password|, donde realmente tiene su configuración en \verb|/etc/pam.d/common-password|. Comprendido esto, modificaremos este fichero para obligar a los nuevos usuarios a que la nueva contraseña que asignen tenga estos criterios:
+	\begin{itemize}
+		\item Permitir que, en caso de fallo, sólo reintente 2 veces.
+		\item Obligatoriedad de contener al menos 1 carácter numérico, 1 carácter mayúscula y 1 carácter minúscula.
+		\item Que no se utilicen palabras claves ya usadas, o que estén en un diccionario.
+	\end{itemize}
+	Antes de comenzar, \textbf{IMPORTANTE} hacer copia del fichero \verb|/etc/pam.d/password| porque si se comenten errores se puede bloquear los cambios de clave y habrá que formatear la máquina. También, es conveniente tener una sesión \verb|root| abierta en caso de problemas.\\\\
+	Este sería el fichero \verb|/etc/pam.d/common-password| actualizado para conseguir cumplir esos criterios:
+	\begin{figure}[H]
+		\centering
+		\begin{minipage}{0.6\textwidth}
+			\centering
+			\includegraphics[width=\linewidth]{Recursos/common-password.png}
+		\end{minipage}\hfill
+		\begin{minipage}{0.35\textwidth}
+			\begin{itemize}
+				\item En el primer módulo, \verb|libpam-pwquality|, indicamos el número de reintentos que tiene el usuario al cambiar la clave y cómo tiene que ser esa clave.
+				\item En el segundo módulo, \verb|libpam-pwhistory|, conseguimos que se almacene las 5 últimas contraseñas.
+			\end{itemize}
+		\end{minipage}
+	\end{figure}
+	
+	\textit{NOTA}: En el caso de perder o dañar dicho archivo y sí tener \verb|backup|, habrá que reiniciar la máquina virtual e ir al CD de \verb|Ubuntu Server| y desde el shell recuperar el fichero.
+	
+	\clearpage
+	
+	\subsubsection{Control de acceso por hora y por terminal}
+	Siguiendo con el servicio \verb|PAM|, procedemos a cambiar el \verb|login| de nuestra máquina para agregar las siguientes restricciones, a través del fichero \verb|/etc/security/time.conf| que configura las reglas del módulo \verb|pam_time| encargado de la autenticación de un usuario en el sistema:
+	\begin{itemize}
+		\item Un usuario cualquiera (por ejemplo \verb|userA|) no pueda trabajar de 11:30h a 11:40h.
+		\item Que ese mismo usuario no se pueda conectar a la consola.
+		\item Y además, pueda acceder al resto de consolas que no sea la \verb|tty1|.
+	\end{itemize}
+	
+	En el fichero, cada línea tiene que tener esta estructura: \verb|services;ttys;users;times|. \\\\ \textbf{IMPORTANTE}: Al igual que antes, hay que hacer copia de los ficheros que vayamos a cambiar en caso de fallo.
+	\begin{figure}[H]
+		\setlength{\abovecaptionskip}{0cm}
+		\setlength{\belowcaptionskip}{0cm}
+		\centering
+		\includegraphics[width=0.9\linewidth]{Recursos/timeConf.png}
+	\end{figure}
+	
+	\subsection{Crontabd y atd}
+	\subsubsection{Crontabd}
+	Se trata de un servicio demonio que permite programar tareas automáticas para que se ejecuten de forma periódica. Para asignar un nueva tarea, lanzamos el comando \verb|crontab -e| donde indicamos primero cada cuanto se va a lanzar el script.
+	\begin{figure}[H]
+		\setlength{\abovecaptionskip}{0cm}
+		\setlength{\belowcaptionskip}{0cm}
+		\centering
+		\includegraphics[width=0.7\linewidth]{Recursos/crontab.png}
+	\end{figure}
+	
+	\subsubsection{atd}
+	La orden \verb|at| ejecuta un programa en un momento específico en el futuro. Toma el tiempo y la fecha deseados como parámetros de línea de comandos, y el comando a ejecutar en su entrada estándar. Ejecutará el programa como si hubiese ingresado en la consola.
+	\begin{figure}[H]
+		\setlength{\abovecaptionskip}{0cm}
+		\setlength{\belowcaptionskip}{0cm}
+		\centering
+		\includegraphics[width=0.7\linewidth]{Recursos/at.png}
+	\end{figure}
+	
+	\subsection{Seguimiento de la ejecución de servicios}
+	Para ver los resultados el servicio demonio \verb|crond| en el registro \verb|rsyslogd|, hay que activar el registro y editar su configuración añadiendo la regla de que los \verb|logs| del servicio aparezcan en el registro. La línea que hay que añadir es \verb|cron.*	/var/log/cron.log| y reiniciar tanto el servicio \verb|cron| y el \verb|rsyslog|.
 	
 	\clearpage
 	
