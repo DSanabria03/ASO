@@ -103,7 +103,7 @@
 	\subsection{Reconocimiento del entorno}
 	Nos piden realizar un reconocimiento del entorno para conocer acerca del sistema que hemos instalado, además de saber cómo funciona la máquina virtual en la página \url{matrix.inf.uva.es}:
 	\begin{itemize}
-		\item \textbf{Version Kernel Linux}: El comando \verb|cat /proc/version|, nos devuelve la información acerca del Linux instalado. En este caso, se trata de un Linux con la versión el kernel 6.8.0-79-generic. El funcionamiento del comando es mostrar lo que contiene el archivo \verb|version| dentro de \verb|proc|, que se trata del sistema de ficheros.
+		\item \textbf{Version Kernel Linux}: El comando \verb|cat /proc/version|, nos devuelve la información acerca del Linux instalado. En este caso, se trata de un Linux con la versión el kernel 6.8.0-79-generic. El funcionamiento del comando es mostrar lo que contiene el archivo \verb|version| dentro de \verb|proc|, que se trata del sistema de ficheros. Otra opción, es con el comando \verb|uname| que muestra información del sistema dependiendo de la opción que se le pase como argumento.
 		\item \textbf{Particiones}: Con el comando \verb|df -h|, se obtiene las particiones montadas. En este caso, tenemos las siguientes particiones:
 		\begin{itemize}
 			\item \textit{/dev/sda1}: Montada en el directorio \verb|/boot/efi| y es la encargada de el arranque del sistema. 
@@ -115,8 +115,8 @@
 			\item \textit{/dev/sda2}: Con \verb|58G| en total, solo se ha usado el 12\%, es decir, \verb|6.5G| se ha utilizado y se encuentran disponibles \verb|49G| para usar.
 		\end{itemize}
 		\item \textbf{Cerrar sesión}: Cuando se ha iniciado sesión y queremos cerrar esa misma sesión, simplemente tenemos que escribir el comando \verb|logout| y el sistema cerrará la sesión.
-		\item \textbf{Apagar la máquina}: Desde la consola del sistema, mediante el comando \verb|shutdown -h| se le enviará una señal al sistema para apagar la máquina.
-		\item \textbf{Reiniciar la máquina}: Para el reinicio, se emplea el comando \verb|reboot|.
+		\item \textbf{Apagar la máquina}: Desde la consola del sistema, mediante el comando \verb|shutdown -h| se le enviará una señal al sistema para apagar la máquina, deteniendo todos los procesos y sincronizando los discos. Si queremos hacerlo inmediato, añadimos \verb|now| al lado de \verb|shutdown|.
+		\item \textbf{Reiniciar la máquina}: Para el reinicio inmediato, se emplea el comando \verb|reboot|, o, para un reinicio programado, se emplea \verb|shutdown -r|.
 		\item \textbf{Controles de la consola de la máquina virtual}: Se pide usar los controles que aparecen en la parte superior:
 		\begin{enumerate}
 			\item Cuando la máquina esté encendida, nos indican apagar la máquina con \verb|Stop|. Esto obligará a la máquina a hacer un apagado forzado.
@@ -212,7 +212,7 @@
 		\includegraphics[width=0.6\linewidth]{Recursos/loop0.png}
 	\end{figure}
 	
-	Cuando tengamos el dispositivo de disco \verb|Loop|, nos piden administrar ñas particiones en ese dispositivo:
+	Cuando tengamos el dispositivo de disco \verb|Loop|, nos piden administrar las particiones en ese dispositivo:
 	\begin{itemize}
 		\item Para crear una partición, haremos uso de la herramienta de \verb|fdisk|. No tendrá ningún valor específico, por lo que se deja todo por defecto.
 		\item Puede ser que el kernel no pueda actualizar automáticamente la tabla de particiones al terminar, por lo que habrá que desanclar y volver anclar el \verb|Loop|.
@@ -255,7 +255,6 @@
 			\centering
 			\includegraphics[width=0.6\linewidth]{Recursos/vgcreate.png}
 		\end{figure}
-		\clearpage
 		\item Por último, creamos un par de volúmenes lógicos, con \verb|lvcreate|, sobre ese grupo que hemos creado en el punto anterior para después montarlo en el sistema:
 		\begin{figure}[H]
 			\setlength{\abovecaptionskip}{0cm}
@@ -288,14 +287,14 @@
 			\setlength{\abovecaptionskip}{0cm}
 			\setlength{\belowcaptionskip}{0cm}
 			\centering
-			\includegraphics[width=0.5\linewidth]{Recursos/fichRAID.png}
+			\includegraphics[width=0.6\linewidth]{Recursos/fichRAID.png}
 		\end{figure}
 		Y después asociarlo a 3 dispositivos \verb|loop|:
 		\begin{figure}[H]
 			\setlength{\abovecaptionskip}{0cm}
 			\setlength{\belowcaptionskip}{0cm}
 			\centering
-			\includegraphics[width=0.5\linewidth]{Recursos/loopRAID.png}
+			\includegraphics[width=0.7\linewidth]{Recursos/loopRAID.png}
 		\end{figure}
 		\item Consultando el manual para crear el dispositivo \verb|RAID|, tenemos que seleccionar el modo \verb|Create|, con las opciones de:
 		\begin{itemize}
@@ -306,7 +305,7 @@
 			\setlength{\abovecaptionskip}{0cm}
 			\setlength{\belowcaptionskip}{0cm}
 			\centering
-			\includegraphics[width=0.6\linewidth]{Recursos/createRAID.png}
+			\includegraphics[width=0.9\linewidth]{Recursos/createRAID.png}
 		\end{figure}
 		\item Ahora repetimos el mismo procedimiento que con el resto de dispositivos de almacenamientos para formatearlos y darle un sistema de ficheros y montarlo:
 		\begin{figure}[H]
@@ -341,13 +340,22 @@
 		\item \textbf{Administración de discos – particiones}: 
 		\begin{itemize}
 			\item Los discos duros o dispositivos de bloques, se dividen en unidades lógicas llamadas \textit{particiones}.\cite{Discos}
-			\item Una partición sirven organizan y almacenan el sistema operativo, las aplicaciones y los archivos personales. Existen diferentes esquemas de particiones para la distribución de particiones en un disco, como MBR o GPT.
+			\item Una partición sirve para organizar y almacenar el sistema operativo, las aplicaciones y los archivos personales. Existen diferentes esquemas para la distribución de particiones en un disco, como MBR o GPT.
 			\item Cada partición se representa como un archivo en el sistema de archivos de Linux y se encuentra ubicada en el directorio \verb|/dev|.
 		\end{itemize}
 		\item \textbf{Sistemas de archivos}: 
 		\begin{itemize}
+			\item Es un elemento que controla cómo se almacenan y recuperan los datos. Sin un sistema de archivos, los datos colocados en un medio de almacenamiento serían un gran cuerpo de datos sin manera de saber dónde termina un dato y comienza el siguiente. 
 			\item Se organizan en una estructura jerárquica, de tipo árbol. El nivel más alto del sistema de ficheros es / o directorio raíz. Todos los demás ficheros y directorios están bajo el directorio raíz.\cite{Archivos}
 			\item Por debajo del directorio raíz (/) hay un importante grupo de directorios común a la mayoría de las distribuciones de GNU/Linux: \verb|/bin, /boot, /etc/, /opt, etc|.
+			\item Tipos de sistemas de ficheros más utilizados en la actualidad:
+			\begin{itemize}
+				\item \verb|EXT|: Con sus versiones \verb|ext2|, \verb|ext3| y \verb|ext4| (siendo esta la más usada en sistemas Linux), fue creado para sobrepasar las limitaciones de \verb|MINIX| y consiguió implementar \verb|VFS|.
+				\item \verb|XFS|: Manejo de grandes volúmenes de datos, por lo que es muy usado en servidores y sistemas empresariales.
+				\item \verb|NTFS|: Sistema principal de \verb|Windows| y con cierta compatibilidad con Linux.
+				\item \verb|FAT32|: Antiguo y limitado, pero muy compatible con todos los sistemas.
+				\item \verb|exFAT|: Evolución del anterior sistema y diseñado especialmente para memorias flash.
+			\end{itemize}
 		\end{itemize}
 		\item \textbf{Actualización de un sistema operativo previamente instalado}:
 		\begin{itemize}
