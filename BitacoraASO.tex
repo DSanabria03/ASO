@@ -471,6 +471,15 @@
 		\centering
 		\includegraphics[width=0.7\linewidth]{Recursos/ejemploGroup.png}
 	\end{figure}
+	\clearpage
+	A mayores, tenemos que asignarle una clave a un grupo, con \verb|sudo gpasswd group|. En la captura podemos ver la clave encriptada del \verb|grupo1|:
+	\begin{figure}[H]
+		\setlength{\abovecaptionskip}{0cm}
+		\setlength{\belowcaptionskip}{0cm}
+		\centering
+		\includegraphics[width=0.8\linewidth]{Recursos/gshadow.png}
+	\end{figure}
+	Esto puede tener varias ventajas, entre ellas el acceso temporal a los recursos que puede tener ese grupo, de forma que el administrador no tiene que estar agregando o excluyendo usuarios del grupo.
 	
 	\subsection{Perfiles de usuario}
 	En este apartado, se pide modificar la configuración del editor de texto \verb|vi|, de forma que para uno de los usuarios creados (por ejemplo \verb|user4|) se realicen dos operaciones automáticamente cuando se abra el programa, por lo que será necesario modificar el archivo con la configuración de este editor.\\\\
@@ -643,7 +652,7 @@
 			\setlength{\abovecaptionskip}{0cm}
 			\setlength{\belowcaptionskip}{0cm}
 			\centering
-			\includegraphics[width=0.9\linewidth]{Recursos/quotaOn.png}
+			\includegraphics[width=\linewidth]{Recursos/quotaOn.png}
 		\end{figure}
 		Aparece un mensaje de aviso sobre el tipo de cuotas que puede ser ignorado ya que funciona sin problemas.
 		\item Revisamos la configuración de las cuotas de cada usuario con \verb|edquota|, en el que aparece las columnas \verb|soft limit| o límite blando que se puede sobrepasar temporalmente, y \verb|hard limit| o límite duro que indica que no se puede sobrepasar ese límite:
@@ -673,7 +682,7 @@
 			\setlength{\abovecaptionskip}{0cm}
 			\setlength{\belowcaptionskip}{0cm}
 			\centering
-			\includegraphics[width=0.7\linewidth]{Recursos/testAudit.png}
+			\includegraphics[width=0.9\linewidth]{Recursos/testAudit.png}
 		\end{figure}
 		El resultado se puede ver en la última línea, que aparece repetida debido a una comprobación anterior del reporte.
 	\end{itemize}
