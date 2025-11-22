@@ -121,7 +121,7 @@
 		\begin{enumerate}
 			\item Cuando la máquina esté encendida, nos indican apagar la máquina con \verb|Stop|. Esto obligará a la máquina a hacer un apagado forzado.
 			\item Después de volver a encender, nos piden restear la máquina mediante la opción \verb|Reset|. Funciona igual que escribir el comando \verb|reboot|.
-			\item Por último, será apagar de nuevo la máquina pero con la opción \verb|Shutdown| que será lo mismo que escribir el comando \verb|shutdown -h|.
+			\item Por último, será apagar de nuevo la máquina pero con la opción \verb|Shutdown| que le envía una señal \verb|ACPI| al sistema operativo.
 		\end{enumerate}
 	\end{itemize}
 	
@@ -808,7 +808,235 @@
 	Para ver los resultados el servicio demonio \verb|crond| en el registro \verb|rsyslogd|, hay que activar el registro y editar su configuración añadiendo la regla de que los \verb|logs| del servicio aparezcan en el registro. La línea que hay que añadir es \verb|cron.*	/var/log/cron.log| y reiniciar tanto el servicio \verb|cron| y el \verb|rsyslog|.
 	
 	\clearpage
+
+
+	\section{Administración del Software. Herramientas de Desarrollo.}
+	\subsection{Administración del Software}
+	\subsubsection{Instalación de aplicaciones precompiladas}
+	Nos piden instalar la herramienta \verb|apt-rdepends| (con \verb|sudo apt install apt-rdepends|) para obtener las dependencias de las aplicaciones que necesitemos utilizar, como es el caso del compilador \verb|gcc|, para programas escritos en \verb|C|. Mirando el manual, el comando para ver las dependencias del compilador es: \verb|apt-depends gcc|. Como la salida recibida aparece demasiada información, lo que haremos es redirigir la salida a un fichero, desde el que podremos ver todos los paquetes se necesitan:
+	\begin{figure}[H]
+		\centering
+		\begin{minipage}{0.55\textwidth}
+			\centering
+			\includegraphics[width=\linewidth]{Recursos/dependenciasGCC.png}
+		\end{minipage}\hfill
+		\begin{minipage}{0.45\textwidth}
+			\begin{itemize}
+				\item En las primeras filas, se nos muestra las dependencias de la aplicación indicada, \verb|gcc|, con su versión más reciente.
+				\item Y para el resto de filas, las dependencias de esos paquetes y, a su vez, las dependencias de esas dependencias.
+			\end{itemize}
+		\end{minipage}
+	\end{figure}
+	Otra forma rápida de comprobar si tenemos los paquetes necesarios para instalar cualquier aplicación, es realización directamente la instalación de esa aplicación primero, ya que \verb|apt| se encarga de comprobar y gestionar las dependencias. Si falta alguna de ellas, no nos dejará instalarlo y se nos mostrará la(s) dependencia(s) que faltan por instalar.\\\\
+	Después de haberlo instalado correctamente con \verb|sudo apt install gcc|, descargamos \verb|git|, gestor de versiones, siguiendo la documentación oficial de la herramienta \cite{git} y comprobando sus dependencias.
+	\clearpage
+	\subsubsection{Reinstalación curl desde su código fuente}
+	Cuando hemos instalado en el bloque anterior \verb|Ubuntu Server|, se instaló junto a él \verb|curl|, empleado para transferir información desde o hacia un servidor usando una \verb|URL|. Como vamos a aprender a instalar aplicaciones desde su código fuente, lo que haremos primero es desinstalarla con \verb|apt-get|:
+	\begin{itemize}
+		\item Antes de eliminar cualquier herramienta, hay que asegurarse si vamos a eliminarla pero mantiene los ficheros de configuración (\verb|remove|), o por el contrario, queremos una eliminación completa (\verb|purge|). Como vamos a reinstalarlo en el sistema, habría que usar la primera opción:
+		\begin{figure}[H]
+			\setlength{\abovecaptionskip}{0cm}
+			\setlength{\belowcaptionskip}{0cm}
+			\centering
+			\includegraphics[width=0.9\linewidth]{Recursos/removeCURL.png}
+		\end{figure}
+		\item Después, clonamos el repositorio con toda la información acerca de \verb|curl|:
+		\begin{figure}[H]
+			\setlength{\abovecaptionskip}{0cm}
+			\setlength{\belowcaptionskip}{0cm}
+			\centering
+			\includegraphics[width=0.9\linewidth]{Recursos/gitCURL.png}
+		\end{figure}
+		\item Las instrucciones se ubican en \verb|curl/README.md|, que leyendo el contenido del fichero, vemos que hay un apartado que indica acerca de la instalación de \verb|git|. En él, se indica el apartado de la documentación dónde explican cómo instalar \verb|curl| desde el repositorio \verb|git|, leyendo \verb|GIT-INFO.md|:
+		\begin{figure}[H]
+			\centering
+			\begin{minipage}{0.55\textwidth}
+				\centering
+				\includegraphics[width=\linewidth]{Recursos/autoreconf.png}
+			\end{minipage}\hfill
+			\begin{minipage}{0.45\textwidth}
+				\begin{itemize}
+					\item \verb|autoreconf|: Es una utilidad del sistema \verb|Autotools| que regenera los \verb|scripts| del sistema de compilación de un proyecto de software, ejecutando varias herramientas en orden de \verb|Autotools| para conseguirlo. Su objetivo es construir el fichero \verb|configure|, que su función es comprobar el sistema si existen las dependencias necesarias y verifica las herramientas que se necesitan en la compilación. Por defecto, no está instalado en el sistema, por lo que habrá que lanzar el comando \verb|sudo apt install autoreconf|.
+				\end{itemize}
+			\end{minipage}
+		\end{figure}
+		\clearpage
+		\item \verb|./configure --with-openssl|: Por una parte, tenemos la ejecución del \verb|script| creado en el paso anterior para crear el \verb|Makefile| a partir de la búsqueda para encontrar ciertas utilidades en el sistema, como el compilador \verb|C|, la ubicación de \verb|make|, etc. Por otra parte, se agrega la opción que aparece al lado para que en la compilación de \verb|curl| haya soporte con \verb|OpenSSL| para permitir una comunicación segura.
+		
+		Al terminar, se nos muestra la información que aparece en la figura:
+		\begin{figure}[H]
+			\setlength{\abovecaptionskip}{0cm}
+			\setlength{\belowcaptionskip}{0cm}
+			\centering
+			\includegraphics[width=0.9\linewidth]{Recursos/configureCurl.png}
+		\end{figure}
+		
+		\item \verb|make|: Por último, solo tendremos que lanzar el comando \verb|make| que se encargará de construir el programa haciendo uso del \verb|Makefile|. Es posible que no venga instalada la herramienta y haya que lanzar el comando \verb|sudo apt install make|:
+		\begin{figure}[H]
+			\setlength{\abovecaptionskip}{0cm}
+			\setlength{\belowcaptionskip}{0cm}
+			\centering
+			\includegraphics[width=0.8\linewidth]{Recursos/installMake.png}
+		\end{figure}
+	\end{itemize}
 	
-	\bibliographystyle{plain}
+	Para verificar si está bien instalada la aplicación, vamos a lanzar el programa que se encuentra en \verb|curl/src/curl| pasándole una dirección web:
+	\begin{figure}[H]
+		\setlength{\abovecaptionskip}{0cm}
+		\setlength{\belowcaptionskip}{0cm}
+		\centering
+		\includegraphics[width=\linewidth]{Recursos/verCurl.png}
+	\end{figure}
+	Como vemos, nos devuelve el contenido de la página \verb|gui.inf.uva.es|, verificando que funciona correctamente.
+	
+	\subsubsection{Actualización del sistema}
+	Una de las primeras tareas a realizar siempre cuando instalamos un sistema operativo es actualizar con los nuevos parches y versiones que existen desde que se publico el medio de instalación usado.
+	
+	Simplemente, usamos \verb|sudo apt-get update| para obtener las actualizaciones y \verb|sudo apt-get upgrade| para descargarlas e instalarlas. Evidentemente, si solo se hace \verb|upgrade| sin previamente haber hecho \verb|update|, no se instalará las actualizaciones más recientes.
+	
+	\begin{figure}[H]
+		\centering
+		\begin{minipage}{0.48\textwidth}
+			\centering
+			\includegraphics[width=\linewidth]{Recursos/update.png}
+		\end{minipage}\hfill
+		\begin{minipage}{0.48\textwidth}
+			\centering
+			\includegraphics[width=\linewidth]{Recursos/upgrade.png}
+		\end{minipage}
+	\end{figure}
+	
+	\subsubsection{Nuevas versiones del núcleo Linux}
+	El último punto de la sección, se aborda el concepto de los \verb|Tarballs|. Se tratan de unos archivos que contiene múltiples ficheros y directorios en un solo archivo. Son especialmente útiles para realizar copias de seguridad, distribuir software o archivos. Además, son una forma común de distribuir software en Linux \cite{TecnoBitsTarball}. \\
+	
+	Para llevar a cabo la tarea de determinar el nombre del paquete que contiene el
+	núcleo, tenemos que averiguar primero su versión con \verb|cat /proc/version| o \verb|uname -r|:
+	\begin{figure}[H]
+		\setlength{\abovecaptionskip}{0cm}
+		\setlength{\belowcaptionskip}{0cm}
+		\centering
+		\includegraphics[width=\linewidth]{Recursos/version.png}
+	\end{figure}
+	Nos indica que se está empleando la \verb|6.8.0-86-generic|, por lo que iremos al directorio \verb|/boot| que es donde se encontrará los ficheros del arranque.
+	Ahora, descargamos con \verb|curl| que hemos descargado y compilado el código fuente de esa misma versión en forma de \verb|tarball|. El repositorio usado se localiza en \\
+	\verb|https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-6.8.tar.xz|:
+	\begin{figure}[H]
+		\setlength{\abovecaptionskip}{0cm}
+		\setlength{\belowcaptionskip}{0cm}
+		\centering
+		\includegraphics[width=0.95\linewidth]{Recursos/tarball.png}
+	\end{figure}
+	\textit{NOTA}: La razón de usar la extensión \verb|.xz| en vez de \verb|.gz| se basa en el tamaño del núcleo de Linux.\\
+	
+	Por último, vamos a comprobar el contenido del fichero comprimido, descomprimiendolo primero con el comando \verb|tar -xvf linux-6.8.tar.xz|. Cuando haya terminado, el contenido que se nos mostrará será el siguiente:
+	\begin{figure}[H]
+		\centering
+		\begin{minipage}{0.45\textwidth}
+			\centering
+			\includegraphics[width=\linewidth]{Recursos/nucleo.png}
+		\end{minipage}\hfill
+		\begin{minipage}{0.55\textwidth}
+			\begin{itemize}
+				\item \textbf{Lógica central}: \verb|arch|, \verb|init|, \verb|kernel| y \verb|mm|
+				\item \textbf{Hardware y Controladores}: \verb|drivers|, \verb|block| y \verb|sound|
+				\item \textbf{Conectividad y Almacenamiento}: \verb|net| y \verb|fs|
+				\item \textbf{Seguridad y Características Avanzadas}: \verb|security|, \verb|crypto|, \verb|virt|, \verb|ipc| y \verb|io_uring|
+				\item \textbf{Herramientas y Soporte}: \verb|include|, \verb|lib|, \verb|scripts|, \verb|tools|, \verb|Documentation|, \verb|samples|, \verb|rust|
+				\item \verb|Ficheros importantes|: \verb|Makefile|, \verb|Kconfig|, \verb|COPYING|, \verb|MAINTAINERS| y \verb|CREDITS|
+			\end{itemize}
+		\end{minipage}
+	\end{figure}	
+	
+	\subsection{Herramientas de Desarrollo}
+	\subsubsection{Shell script avanzados}
+	Un \verb|shell script| es un programa creado con instrucciones que son ejecutadas por un \verb|shell| de Linux o Unix. Necesita un programa que entienda los comandos y estructuras que contiene y esto se suele poner en la primera línea del programa (\verb|#!/bin/bash|) \cite{shell}. 
+	
+	Una vez definido el concepto, procedemos a escribir el programa que nos devuelva los datos pedidos:
+	\begin{figure}[H]
+		\centering
+		\begin{minipage}{0.48\textwidth}
+			\centering
+			\includegraphics[width=\linewidth]{Recursos/usuarios1.png}
+		\end{minipage}\hfill
+		\begin{minipage}{0.48\textwidth}
+			\centering
+			\includegraphics[width=\linewidth]{Recursos/usuarios2.png}
+		\end{minipage}
+	\end{figure}
+	
+	Comprobamos su funcionamiento, después otorgarle permisos de ejecución con \verb|sudo chmod +x usuarios.sh|, y estos son los resultados que nos imprime (redirigiendo la salida a un fichero de texto, ya que sino no es posible verlo al completo):
+	
+	\begin{figure}[H]
+		\centering
+		\begin{minipage}{0.48\textwidth}
+			\centering
+			\includegraphics[width=\linewidth]{Recursos/salida1.png}
+		\end{minipage}\hfill
+		\begin{minipage}{0.48\textwidth}
+			\centering
+			\includegraphics[width=\linewidth]{Recursos/salida2.png}
+		\end{minipage}
+	\end{figure}
+	
+	\subsubsection{Creación de una aplicación con lenguaje de alto nivel}
+	Para terminar con está sección, vamos un perfilado de un programa que se encargue de leer los datos de un fichero de \verb|log| qu contiene información procedente de \verb|Apache Web Server| y de \verb|Internet Information Server|. Además, crearemos un \verb|Makefile| que se encargue de la actualización del ejecutable de la aplicación. Un \verb|Makefile| contiene un conjunto de instrucciones que se usan para ayudar a decidir qué partes de un programa grande necesitan ser recompiladas \cite{makefile}.\\
+	
+	Lo primero que nos piden es analizar el formato de los ficheros de \verb|log| de \verb|d100.log| y \verb|da-11-16.ipntld.log|:
+	\begin{figure}[H]
+		\setlength{\abovecaptionskip}{0cm}
+		\setlength{\belowcaptionskip}{0cm}
+		\centering
+		\includegraphics[width=0.65\linewidth]{Recursos/d100.png}
+	\end{figure}
+	\begin{itemize}
+		\item Según su estructura, los ficheros siguen el formato estándar \verb|NCSA Combined Log Format|, que es el formato por defecto y más utilizado por \verb|Apache Web Server|.
+		\item Tomemos la primera línea del fichero \verb|d100.log| para diseccionarla. Cada espacio separa un campo diferente:
+		\begin{itemize}
+			\item \verb|136.199.199.88|: IP del Cliente
+			\item \verb|-|: Identidad (\verb|RFC 1413|)
+			\item \verb|-|: Usuario
+			\item \verb|[17/Nov/2012:03:00:27 +0100]|: Fecha y hora
+			\item \verb|GET /index.php HTTP/1.1|: Petición
+			\item \verb|200|: Código de estado
+			\item \verb|4882|: Tamaño
+			\item \verb|"-"|: Referer
+			\item \verb|"Mozilla/5.0 ..."|: User Agent
+		\end{itemize}
+	\end{itemize}
+	Podemos concluir que el fichero \verb|d100.log| muestra la actividad normal de un servidor web:
+	\begin{enumerate}
+		\item Vemos tráfico de 3 sistemas operativos distintos (según su dirección IP)
+		\item Vemos un cliente antiguo o bot (IP 213.60...) buscando archivos de configuración estándar (favicon, robots.txt) que no existen, generando errores 404.
+		\item Vemos un usuario recurrente (IP 83.33...) que aprovecha bien la caché del navegador (muchos códigos 304), lo que reduce la carga del servidor.
+	\end{enumerate}
+	
+	
+	Después de este análisis, construimos un programa que lea el fichero \verb|log| y determine la dirección que más consultas ha hecho al servidor, la cantidad de bytes que se han descargado tanto por cliente conectado como por hora. Cuando lo tengamos, crearemos el fichero \verb|Makefile| para la aplicación:
+	\begin{figure}[H]
+		\setlength{\abovecaptionskip}{0cm}
+		\setlength{\belowcaptionskip}{0cm}
+		\centering
+		\includegraphics[width=0.85\linewidth]{Recursos/makefile.png}
+	\end{figure}
+	
+	Como se puede observar, hemos creado una regla que realiza un perfilado automático y lo guarda en un fichero de texto con todo el análisis. Hay que usar el fichero \verb|log da-11-16.ipntld.log|:
+	\begin{figure}[H]
+		\setlength{\abovecaptionskip}{0cm}
+		\setlength{\belowcaptionskip}{0cm}
+		\centering
+		\includegraphics[width=0.85\linewidth]{Recursos/make.png}
+	\end{figure}
+	
+	\clearpage
+	
+	
+	\section{Administración avanzada de servicios}
+	
+	
+	
+	
+	\clearpage
+	
+	\bibliographystyle{unsrt}
 	\bibliography{bibliografia}
 \end{document}
