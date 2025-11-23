@@ -578,7 +578,7 @@
 		\includegraphics[width=0.7\linewidth]{Recursos/sshService.png}
 	\end{figure}
 	Es esencial tener un equipo con los servicios esenciales activos y desactivar aquellos que no tienen mucha relevancia, ya que consumen recursos innecesarios y pueden llegar a ser un riesgo en la seguridad. Investigando el listado de servicios que hay activos en mi máquina, hay ciertos servicios que se pueden quitar como \verb|ModemManager.servicie| debido a que solo se emplea para la gestión de módems 3G/4G.\\\\
-	Y para terminar con esta sección, nos piden que el sistema desde el arranque vaya al nivel de ejecución 3 (\verb|runlevel3|), es decir sin entorno gráfico y solo en modo texto con red. Dependiendo de cada \verb|runlevel| entre 1 y 5, Linux se ejecutará de una forma distinta. Para arrancar como ese nivel de ejecución \verb|sudo systemctl set-default multi-user.target|
+	Y para terminar con esta sección, nos piden que el sistema desde el arranque vaya al nivel de ejecución 3 (\verb|runlevel3|), es decir sin entorno gráfico y solo en modo texto con red. Dependiendo de cada \verb|runlevel| entre 1 y 5, Linux se ejecutará de una forma distinta. Para arrancar como ese nivel de ejecución \verb|sudo systemctl set-default multi-user.target| \label{target}
 	\begin{figure}[H]
 		\setlength{\abovecaptionskip}{0cm}
 		\setlength{\belowcaptionskip}{0cm}
@@ -1031,9 +1031,194 @@
 	
 	
 	\section{Administración avanzada de servicios}
+	\subsection{Niveles de ejecución (Run-level)}
+	En entornos \verb|UNIX/LINUX|, los niveles de ejecución son aquellos estados que definen qué servicios del sistema están funcionando y se identifican por números \cite{runlevels}.\\
 	
+	Como bien se menciona, en la actualidad, se han sustituido los \verb|run-level| por \verb|targets| (realizamos esta tarea en \ref{target}). En nuestro sistema, investigando los \verb|targets| que existen en nuestra máquina, lanzamos el comando \verb|ls -l /etc/systemd/system|:
+	\begin{figure}[H]
+		\setlength{\abovecaptionskip}{0cm}
+		\setlength{\belowcaptionskip}{0cm}
+		\centering
+		\includegraphics[width=\linewidth]{Recursos/targets.png}
+	\end{figure}
+	Ahora, con ayuda del manual de Linux (\verb|man runlevel|, \verb|man systemd| y \verb|man systemd.target|) ponemos en práctica los niveles de ejecución del sistema:
+	\begin{itemize}
+		\item Para determinar el \verb|target| por defecto que se encuentra, usamos el comando \verb|systemctl get-default|:
+		\begin{figure}[H]
+			\setlength{\abovecaptionskip}{0cm}
+			\setlength{\belowcaptionskip}{0cm}
+			\centering
+			\includegraphics[width=0.7\linewidth]{Recursos/targetDefault.png}
+		\end{figure}
+		El que aparece por defecto, es el \verb|multi-user.target|, que es el que cambiamos en \ref{target}.
+		\item Ahora, pasamos al nivel \verb|monousuario| o el antiguo nivel 1, que corresponde a \verb|rescue.target|. En este modo, el sistema cerrará los servicios de red y gráficos, dejándonos solos en una consola de texto:
+		\begin{figure}[H]
+			\setlength{\abovecaptionskip}{0cm}
+			\setlength{\belowcaptionskip}{0cm}
+			\centering
+			\includegraphics[width=0.7\linewidth]{Recursos/monousuario.png}
+		\end{figure}
+		\item Volvemos al modo anterior, con el mismo comando cambiando el \verb|target|.
+	\end{itemize}
 	
+	\subsection{Creación de nuevos servicios}
+	Una vez que conocemos los distintos \verb|targets| y servicios que existen en el sistema (Bloque 1), vamos a crear nuestro propio servicio que se encargue de montar un disco sobre un dispositivo \verb|loop| cada vez que se inicie el sistema.\\
 	
+	Primero, creamos el disco sobre un fichero (como en el Bloque 1) y montar un sistema de ficheros dentro de él:
+	\begin{figure}[H]
+		\setlength{\abovecaptionskip}{0cm}
+		\setlength{\belowcaptionskip}{0cm}
+		\centering
+		\includegraphics[width=0.9\linewidth]{Recursos/disk.png}
+	\end{figure}
+	\begin{figure}[H]
+		\setlength{\abovecaptionskip}{0cm}
+		\setlength{\belowcaptionskip}{0cm}
+		\centering
+		\includegraphics[width=0.9\linewidth]{Recursos/diskEXT4.png}
+	\end{figure}
+	
+	Creamos el fichero en \verb|/root/.scripts/inicia_disco.sh| y le otorgamos permisos de ejecución con el comando \verb|chmod +x inicia_disco.sh|. Después, creamos el fichero con el servicio en \\ \verb|/etc/systemd/system/inicia_mi_vol.service| y lo habilitamos con \verb|systemctl enable inicia_mi_vol.service|:
+	\begin{figure}[H]
+		\setlength{\abovecaptionskip}{0cm}
+		\setlength{\belowcaptionskip}{0cm}
+		\centering
+		\includegraphics[width=\linewidth]{Recursos/servicioIniciado.png}
+	\end{figure}
+	\begin{figure}[H]
+		\setlength{\abovecaptionskip}{0cm}
+		\setlength{\belowcaptionskip}{0cm}
+		\centering
+		\includegraphics[width=\linewidth]{Recursos/dfLoop40.png}
+	\end{figure}
+	
+	\subsection{Servidor Web}
+	Continuando con esta sección, vamos a instalar y configurar un servidor web en nuestra máquina, concretamente el paquete \verb|nginx|. Para ello, primero comprobamos si existe alguna actualización y instalamos dicho paquete:
+	\begin{figure}[H]
+		\setlength{\abovecaptionskip}{0cm}
+		\setlength{\belowcaptionskip}{0cm}
+		\centering
+		\includegraphics[width=0.9\linewidth]{Recursos/nginxInstall.png}
+	\end{figure}
+	Ahora, comprobamos con la herramienta \verb|curl|, si funciona correctamente el funcionamiento local (\verb|localhost|):
+	\begin{figure}[H]
+		\setlength{\abovecaptionskip}{0cm}
+		\setlength{\belowcaptionskip}{0cm}
+		\centering
+		\includegraphics[width=0.8\linewidth]{Recursos/localhostCurl.png}
+	\end{figure}
+	Como se puede apreciar en el código \verb|HTML|, se puede ver la página de bienvenida de \verb|nginx|, confirmando que el servicio funciona correctamente.
+	\clearpage
+	Siguiendo la documentación oficial de \verb|nginx| \cite{nginx_docs} para saber cómo configurar el servicio web, vemos que se nos menciona el fichero de configuración principal \verb|/etc/nginx/nginx.conf| que importa distintos módulos para desempeñar distintas funciones. Además, en el directorio \verb|/var/log/nginx|, se ubican los distintos \verb|logs| o registros que son necesarios tener en cuenta para auditar su funcionamiento.\\
+	
+	Lo siguiente, es agregar en el directorio \verb|/var/www/html| un par de páginas \verb|HTML| con enlaces a ficheros para descargar con imágenes que visualizar. 
+	Cuando estén, accedemos a esos ficheros \verb|HTML| con \verb|curl| y vemos como han cambiado los fichero de registro anteriores:
+	\begin{figure}[H]
+		\setlength{\abovecaptionskip}{0cm}
+		\setlength{\belowcaptionskip}{0cm}
+		\centering
+		\includegraphics[width=0.9\linewidth]{Recursos/logNginx.png}
+	\end{figure}
+	Se muestra en las dos últimas líneas el acceso a las páginas \verb|HTML| indicadas.\\
+	
+	Por último, vamos poner a prueba la seguridad de nuestro servicio web. Le he pedido a un compañero que acceda a mi servicio web lanzando el comando \verb|curl 10.0.38.3|, que es mi dirección IP:
+	\begin{figure}[H]
+		\setlength{\abovecaptionskip}{0cm}
+		\setlength{\belowcaptionskip}{0cm}
+		\centering
+		\includegraphics[width=0.9\linewidth]{Recursos/curlIP.jpg}
+	\end{figure}
+	Como bien se aprecia, se puede demostrar lo que nos indica el enunciado de que por defecto, \verb|Ubuntu| no trae activados los cortafuegos, así que mi compañero ha podido conectarse a mi servicio web.\\
+	
+	Para activar el \verb|firewall|, utilizamos el comando \verb|sudo ufw enable| que interactuará con \verb|iptables| de nuestra máquina:
+	\begin{figure}[H]
+		\setlength{\abovecaptionskip}{0cm}
+		\setlength{\belowcaptionskip}{0cm}
+		\centering
+		\includegraphics[width=0.9\linewidth]{Recursos/ufw.png}
+	\end{figure}
+	La política por defecto es que rechazar todas las conexiones entrantes y se puede comprobar si desde otra máquina intentamos conectarnos a la máquina virtual, por ejemplo mediante \verb|ssh|.\\
+	
+	Para permitir que se puedan realizar conexiones \verb|SSH|, tenemos que poner el siguiente comando: \\ \verb|sudo iptables -I INPUT -p tcp --dport 22 -j ACCEPT|:
+	\begin{itemize}
+		\item \verb|-I INPUT|: Insertar al principio de la cadena de entrada
+		\item \verb|-p tcp|: Protocolo TCP
+		\item \verb|--dport 22|: Puerto destino 22
+		\item \verb|-j ACCEPT|: Aceptar paquete
+	\end{itemize}
+	Y para el servicio \verb|HTTP|, el comando será: \verb|sudo iptables -I INPUT -p tcp --dport 80 -j ACCEPT|
+
+	\subsection{XWindow}
+	El \verb|X Window System|, también conocido como \verb|X Windows|, es un sistema de ventanas que proporciona una infraestructura para la creación y manipulación de interfaces gráficas de usuario en sistemas \verb|UNIX| \cite{xwindow}. Se realizará una instalación mínima con los siguientes paquetes:
+	\begin{itemize}
+		\item \verb|xserver-xorg-core|: El corazón del sistema gráfico (el servidor)
+		\item \verb|openbox|: Un gestor de ventanas ligero (para poder moverlas, cerrarlas, etc.)
+		\item \verb|xinit|: Aplicación para iniciar el entorno gráfico XWindow
+		\item \verb|xterm|: La terminal básica en modo gráfico
+		\item \verb|slim|: Un gestor de inicio de sesión. Al instalar \verb|slim|, el sistema cambiará su comportamiento de arranque por defecto al \verb|runlevel| 5 (modo gráfico).
+	\end{itemize}
+	
+	Ahora, iniciamos sesión como \verb|root| para arrancar el servidor, usando el comando \verb|X|. Como estamos en una máquina virtual, no hay manera de salir, por lo que habrá que iniciar sesión desde otra máquina mediante \verb|ssh| y matar el proceso. Al finalizarlo, nos aparecerá esto:
+	\begin{figure}[H]
+		\setlength{\abovecaptionskip}{0cm}
+		\setlength{\belowcaptionskip}{0cm}
+		\centering
+		\includegraphics[width=0.95\linewidth]{Recursos/X.png}
+	\end{figure}
+	
+	Por otro lado, se puede iniciar el gestor mediante el comando \verb|xinit| y lanzar un primer cliente que es normalmente \verb|xterm|. Leyendo la documentación acerca de ese comando \cite{xinit}, primero hay que configurar el fichero \verb|/root/.xinitrc| y agregar una línea con \verb|exec openbox-session|. Al ejecutar el servicio, se iniciará el gestor de ventanas \verb|Openbox|:
+	\begin{figure}[H]
+		\setlength{\abovecaptionskip}{0cm}
+		\setlength{\belowcaptionskip}{0cm}
+		\centering
+		\includegraphics[width=0.75\linewidth]{Recursos/xinit.png}
+	\end{figure}
+	
+	Otros clientes del servicio se encuentran dentro del paquete \verb|x11-apps|, como \verb|xclock| (Un reloj analógico), \verb|xeyes| (Unos ojos que siguen el cursor) y \verb|xcalc| (Una calculadora científica).
+	\begin{figure}[H]
+		\setlength{\abovecaptionskip}{0cm}
+		\setlength{\belowcaptionskip}{0cm}
+		\centering
+		\includegraphics[width=0.85\linewidth]{Recursos/x11app.png}
+	\end{figure}
+	
+	Como queremos hacer la prueba de ejecutar los clientes desde el servidor, tenemos que iniciar el servicio \verb|xinit| con la terminal \verb|xterm|, modificando el \verb|.xinitrc|:
+	\begin{figure}[H]
+		\setlength{\abovecaptionskip}{0cm}
+		\setlength{\belowcaptionskip}{0cm}
+		\centering
+		\includegraphics[width=0.85\linewidth]{Recursos/xterm.png}
+	\end{figure}
+	
+	Y desde ahí, lanzamos el cliente \verb|xclock|:
+	\begin{figure}[H]
+		\setlength{\abovecaptionskip}{0cm}
+		\setlength{\belowcaptionskip}{0cm}
+		\centering
+		\includegraphics[width=0.85\linewidth]{Recursos/xclock.png}
+	\end{figure}
+	
+	Para iniciarlos automáticamente, modificamos el fichero anterior y agregamos \verb|xclock -geometry| \\ \verb|150x150+10+10 &|, antes de lanzar el cliente \verb|xterm|. En el caso que queramos arrancar \verb|XWindow| con el \verb|script startx|, se escribe en la línea de comando \verb|startx| y lanza el fichero \verb|.xinitrc|.\\
+	
+	Cuando estamos en un entorno gráfico, tenemos que saber cómo funciona la lógica del servicio. Por una parte, tenemos el servidor que se encarga de mostrar los gráficos y capturar el teclado y el ratón; y por otra parte, tenemos el cliente que es la propia aplicación. Para saber dónde se están dibujando esos gráficos, imprimimos el valor de la variable \verb|$DISPLAY|. El resultado que obtenemos es \verb|:0|, que sigue el formato \verb|hostname:display_number.screen_number|. En este caso, significa que es en la máquina local y en el primer display físico.
+	\begin{figure}[H]
+		\setlength{\abovecaptionskip}{0cm}
+		\setlength{\belowcaptionskip}{0cm}
+		\centering
+		\includegraphics[width=0.85\linewidth]{Recursos/display.png}
+	\end{figure}
+	
+	Para terminar con esta parte, vamos a ejecutar el cliente \verb|X| desde mi máquina local Linux. Para ello, desde mi terminal, se lanza el comando \verb|ssh -X -p 38031 dansana@virtual.lab.inf.uva.es| para conectarme a la máquina virtual, activando el \verb|X11 Forwarding| para que aparezca en mi pantalla. Una vez dentro, se ejecuta el servidor y se comprueba el valor \verb|$DISPLAY|, ya que nos indicará que el túnel gráfico funciona correctamente:
+	\begin{figure}[H]
+		\setlength{\abovecaptionskip}{0cm}
+		\setlength{\belowcaptionskip}{0cm}
+		\centering
+		\includegraphics[width=\linewidth]{Recursos/localXterm.png}
+	\end{figure}
+	
+	\clearpage
+	
+	\section{Monitorización}
 	
 	\clearpage
 	
