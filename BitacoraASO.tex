@@ -1380,7 +1380,273 @@
 		\end{itemize}
 	\end{itemize}
 	
+	\clearpage
 	
+	\section{Virtualización}
+	\subsection{VirtualBox}
+	\verb|VirtualBox| es una aplicación de virtualización multi-plataforma. Esto significa que amplía las capacidades de nuestra máquina, por lo que puede ejecutar múltiples sistemas operativos, dentro de múltiples máquinas virtuales al mismo tiempo \cite{VirtualBox}.
+	\subsubsection{Instalación}
+	Para realizar la instalación en la máquina virtual y después de haber actualizado el sistema, lanzamos el comando \verb|apt-get install virtualbox|:
+	\begin{figure}[H]
+		\setlength{\abovecaptionskip}{0cm}
+		\setlength{\belowcaptionskip}{0cm}
+		\centering
+		\includegraphics[width=\linewidth]{Recursos/installVirtualBox.png}
+	\end{figure}
+	
+	\subsubsection{Servicio Virtualizado}
+	Tras completar la instalación, procedemos a descargar e instalar un servicio virtualizado que nos servirá como máquina virtual. Se trata de un \verb|Linux FedoraCore 1| que obtendremos de la dirección IP \verb|10.0.38.250| y la guardaremos en el directorio \verb|home| del \verb|root|:
+	\begin{figure}[H]
+		\setlength{\abovecaptionskip}{0cm}
+		\setlength{\belowcaptionskip}{0cm}
+		\centering
+		\includegraphics[width=\linewidth]{Recursos/fc1.png}
+	\end{figure}
+	
+	\subsubsection{Importación de un servicio}
+	Desde el entorno gráfico que hemos visto en la sección, abrimos la aplicación de \verb|VirtualBox| para importar el servicio que hemos descargado:
+	\begin{figure}[H]
+		\setlength{\abovecaptionskip}{0cm}
+		\setlength{\belowcaptionskip}{0cm}
+		\centering
+		\includegraphics[width=0.65\linewidth]{Recursos/virtualboxXinit.png}
+	\end{figure}
+	\begin{figure}[H]
+		\setlength{\abovecaptionskip}{0cm}
+		\setlength{\belowcaptionskip}{0cm}
+		\centering
+		\includegraphics[width=0.65\linewidth]{Recursos/virtualboxFC1.png}
+	\end{figure}
+	\begin{figure}[H]
+		\setlength{\abovecaptionskip}{0cm}
+		\setlength{\belowcaptionskip}{0cm}
+		\centering
+		\includegraphics[width=0.65\linewidth]{Recursos/virtualboxPreferencias.png}
+	\end{figure}
+	\begin{figure}[H]
+		\setlength{\abovecaptionskip}{0cm}
+		\setlength{\belowcaptionskip}{0cm}
+		\centering
+		\includegraphics[width=0.65\linewidth]{Recursos/servicioImportado.png}
+	\end{figure}
+	Una vez importado, podemos eliminar el fichero que contenía el servicio para ahorrar espacio. Arrancamos la máquina e iniciamos sesión como \verb|root|:
+	\begin{figure}[H]
+		\setlength{\abovecaptionskip}{0cm}
+		\setlength{\belowcaptionskip}{0cm}
+		\centering
+		\includegraphics[width=0.6\linewidth]{Recursos/inicioMaquina.png}
+	\end{figure}
+	
+	\subsubsection{Administración de una máquina virtual}
+	Al igual que hemos en el primer bloque, probamos todas las opciones que existen en la máquina virtual. 
+	\begin{itemize}
+		\item Para pausar y reiniciar, tenemos que hacer clic en \verb|Máquina| con la máquina arrancada y hacer clic en las opciones correspondientes. Para apagar la máquina, es necesario hacerlo desde la opción \verb|Archivo -> Salir|:
+		\begin{figure}[H]
+			\setlength{\abovecaptionskip}{0cm}
+			\setlength{\belowcaptionskip}{0cm}
+			\centering
+			\includegraphics[width=0.45\linewidth]{Recursos/maquinaOpciones.png}
+		\end{figure}
+		\item Para tomar una instantánea de la máquina y recuperar una, tenemos que ir al apartado de \verb|Instantánea| de la máquina:
+		\begin{figure}[H]
+			\setlength{\abovecaptionskip}{0cm}
+			\setlength{\belowcaptionskip}{0cm}
+			\centering
+			\includegraphics[width=0.75\linewidth]{Recursos/instantanea.png}
+		\end{figure}
+		Hacemos la prueba de agregar una nueva instantánea para luego recuperarla en caso de error. 
+		\begin{figure}[H]
+			\setlength{\abovecaptionskip}{0cm}
+			\setlength{\belowcaptionskip}{0cm}
+			\centering
+			\includegraphics[width=0.75\linewidth]{Recursos/inicioInstantanea.png}
+		\end{figure}
+		\begin{figure}[H]
+			\setlength{\abovecaptionskip}{0cm}
+			\setlength{\belowcaptionskip}{0cm}
+			\centering
+			\includegraphics[width=0.75\linewidth]{Recursos/restaurarInstantanea.png}
+		\end{figure}
+	\end{itemize}
+	Realizamos un \verb|clon| de la máquina en su estado actual dentro del apartado de \verb|Instantaneas| de la máquina: 
+	\begin{figure}[H]
+		\setlength{\abovecaptionskip}{0cm}
+		\setlength{\belowcaptionskip}{0cm}
+		\centering
+		\includegraphics[width=0.8\linewidth]{Recursos/clon.png}
+	\end{figure}
+	Ahora bien, cuando creemos el \verb|clon| con copia enlazada, tenemos que indicar en la \verb|Política de dirección MAC| que se deben generar nuevas direcciones MAC:
+	\begin{figure}[H]
+		\setlength{\abovecaptionskip}{0cm}
+		\setlength{\belowcaptionskip}{0cm}
+		\centering
+		\includegraphics[width=0.8\linewidth]{Recursos/clon1.png}
+	\end{figure}
+	La diferencia principal es el tipo de clonación que se ha escogido: por un lado está la completa, que es una copia exacta de los ficheros; y la copia enlazada, que los archivos de las unidades de disco duro virtuales será vinculados a los archivos de disco duro virtual de la máquina virtual original.\\
+	
+	Borramos el \verb|backup| y hacemos una nueva clonación con copia enlazada. Al iniciar ambas máquinas a la vez, veremos que tardará más de lo normal debido a que necesita mayor cantidad recursos.
+	
+	\subsubsection{Administración de disco}
+	Vamos a adentrarnos en el apartado del almacenamiento de las máquinas virtuales. Creamos en la sección de \verb|Almacenamiento| un nuevo disco duro para la máquina, con un tamaño pequeño. Es importante que se reserve de forma dinámica el espacio:
+	\begin{figure}[H]
+		\setlength{\abovecaptionskip}{0cm}
+		\setlength{\belowcaptionskip}{0cm}
+		\centering
+		\includegraphics[width=0.8\linewidth]{Recursos/fc1-1disk.png}
+	\end{figure}
+	Ahora, con la herramienta \verb|fdisk| y con \verb|mkfs| hacemos la partición y el sistema de ficheros, respectivamente:
+	\begin{figure}[H]
+		\centering
+		\begin{minipage}{0.48\textwidth}
+			\centering
+			\includegraphics[width=\linewidth]{Recursos/fdiskFC.png}
+		\end{minipage}\hfill
+		\begin{minipage}{0.48\textwidth}
+			\centering
+			\includegraphics[width=\linewidth]{Recursos/mkfsFC.png}
+		\end{minipage}
+	\end{figure}
+	Por último, montamos la partición con \verb|mount| en \verb|/mnt|, por ejemplo:
+	\begin{figure}[H]
+		\setlength{\abovecaptionskip}{0cm}
+		\setlength{\belowcaptionskip}{0cm}
+		\centering
+		\includegraphics[width=0.8\linewidth]{Recursos/mountFC.png}
+	\end{figure}
+	
+	Después, vamos a ver los distintos tipos de disco que soporta la aplicación, entre ellos \cite{VirtualBox_Storage}:
+	\begin{itemize}
+		\item \verb|Disk Images Files|: Empieza siendo muy pequeño y crece automáticamente a medida que el sistema invitado escribe datos en él, hasta llegar al límite máximo definido. Aunque inicialmente ahorra espacio, puede tener una ligera penalización de rendimiento mientras se expande.
+		\item \verb|Differencing Images|: Se describe como un disco especial que solo almacena las diferencias respecto a otro disco "padre". Es la tecnología base que usa VirtualBox para las Instantáneas y los Clones Enlazados.
+	\end{itemize}
+	\subsubsection{Administración de red}
+	En este apartado, vamos a conocer acerca de la configuración de red de las máquinas virtuales anidadas. Arrancamos ambas y comprobamos sus direcciones IP para realizar diferentes pruebas:
+	\begin{figure}[H]
+		\centering
+		\begin{minipage}{0.48\textwidth}
+			\centering
+			\includegraphics[width=\linewidth]{Recursos/ipFC1.png}
+		\end{minipage}\hfill
+		\begin{minipage}{0.48\textwidth}
+			\centering
+			\includegraphics[width=\linewidth]{Recursos/ipFC1.png}
+		\end{minipage}
+	\end{figure}
+	Podemos ver como en ambos casos es la misma dirección y no se podrá hacer ninguna prueba de conexión entre ellas, debido a que está seleccionada la opción de red \verb|NAT|. Para que tengan distinta, tenemos que marcar la opción \verb|Red NAT|.
+	\begin{figure}[H]
+		\setlength{\abovecaptionskip}{0cm}
+		\setlength{\belowcaptionskip}{0cm}
+		\centering
+		\includegraphics[width=0.8\linewidth]{Recursos/redNAT.png}
+	\end{figure}
+	Sin apagar las máquinas, cambiamos su configuración de red y reiniciamos sus servicios con \\ \verb|/etc/init.d/network restart|:
+	\begin{figure}[H]
+		\setlength{\abovecaptionskip}{0cm}
+		\setlength{\belowcaptionskip}{0cm}
+		\centering
+		\includegraphics[width=0.8\linewidth]{Recursos/resetNetwork.png}
+	\end{figure}
+	Y ahora sí que se pueden ver porque tienen distinta dirección IP:
+	\begin{figure}[H]
+		\setlength{\abovecaptionskip}{0cm}
+		\setlength{\belowcaptionskip}{0cm}
+		\centering
+		\includegraphics[width=0.8\linewidth]{Recursos/ipDistintas.png}
+	\end{figure}
+	Podemos comprobarlo realizando un \verb|ping| y un \verb|ssh| entre máquinas:
+	\begin{figure}[H]
+		\centering
+		\begin{minipage}{0.48\textwidth}
+			\centering
+			\includegraphics[width=\linewidth]{Recursos/pingFCs.png}
+		\end{minipage}\hfill
+		\begin{minipage}{0.48\textwidth}
+			\centering
+			\includegraphics[width=\linewidth]{Recursos/sshFCs.png}
+		\end{minipage}
+	\end{figure}
+	\subsection{Contenedores}
+	\subsubsection{Docker}
+	Para su instalación, ponemos el comando \verb|apt install docker.io| y comprobamos su versión e información del paquete con \verb|docker version| y \verb|docker info|:
+	\begin{figure}[H]
+		\centering
+		\begin{minipage}{0.48\textwidth}
+			\centering
+			\includegraphics[width=0.9\linewidth]{Recursos/dockerVersion.png}
+		\end{minipage}\hfill
+		\begin{minipage}{0.48\textwidth}
+			\centering
+			\includegraphics[width=0.8\linewidth]{Recursos/infoDocker.png}
+		\end{minipage}
+	\end{figure}
+	Hacemos la prueba con la imagen de \verb|Ubuntu|, primero la descargamos con \verb|docker search ubuntu|:
+	\begin{figure}[H]
+		\setlength{\abovecaptionskip}{0cm}
+		\setlength{\belowcaptionskip}{0cm}
+		\centering
+		\includegraphics[width=0.8\linewidth]{Recursos/searchUbuntu.png}
+	\end{figure}
+	Descargamos un \verb|Ubuntu| con lo mínimo con \verb|docker pull docker.io/ubuntu|:
+	\begin{figure}[H]
+		\setlength{\abovecaptionskip}{0cm}
+		\setlength{\belowcaptionskip}{0cm}
+		\centering
+		\includegraphics[width=0.8\linewidth]{Recursos/dockerPull.png}
+	\end{figure}
+	Ahora lo podemos ejecutar con \verb|docker run -i -t docker.io/ubuntu|.
+	\subsubsection{Administración}
+	Si estamos dentro del contenedor, veremos que está anclado a un terminal. Se puede desanclar con la combinación \verb|Ctrl+P| y luego \verb|Ctrl+Q|. De esta manera, quedará en un segundo plano, que se podrá ver desde \verb|docker ps|:
+	\begin{figure}[H]
+		\setlength{\abovecaptionskip}{0cm}
+		\setlength{\belowcaptionskip}{0cm}
+		\centering
+		\includegraphics[width=0.8\linewidth]{Recursos/dockerPS.png}
+	\end{figure}
+	Para volverlo a atar, \verb|docker attach  nombre_del_contenedor|. Y para apagarlo es con \verb|exit| desde dentro, o \verb|docker kill| desde fuera.\\
+	
+	Luego, vamos a actualizar el contenedor desde el que nos encontramos e instalamos el servicio \verb|SSH|:
+	\begin{figure}[H]
+		\setlength{\abovecaptionskip}{0cm}
+		\setlength{\belowcaptionskip}{0cm}
+		\centering
+		\includegraphics[width=\linewidth]{Recursos/sshDocker.png}
+	\end{figure}
+	Lo habilitamos con \verb|service ssh start| y creamos un usuario en el contenedor para acceder por \verb|ssh|:
+	\begin{figure}[H]
+		\setlength{\abovecaptionskip}{0cm}
+		\setlength{\belowcaptionskip}{0cm}
+		\centering
+		\includegraphics[width=0.7\linewidth]{Recursos/userSSH.png}
+	\end{figure}
+	Para saber la dirección IP del contenedor, tendríamos que usar \verb|ifconfig|. Sin embargo, al ser un comando viejo, no viene instalado, por que habrá que instalar el paquete que lo contiene con \verb|apt-get install net-tools|. Cuando lo tengamos, podremos hacer un \verb|ssh|:
+	\begin{figure}[H]
+		\centering
+		\begin{minipage}{0.48\textwidth}
+			\centering
+			\includegraphics[width=0.9\linewidth]{Recursos/ifconfigDocker.png}
+		\end{minipage}\hfill
+		\begin{minipage}{0.48\textwidth}
+			\centering
+			\includegraphics[width=0.8\linewidth]{Recursos/sshDocker1.png}
+		\end{minipage}
+	\end{figure}
+	Para acabar, vamos a crear una nueva imagen del contenedor, siguiendo los pasos indicados:
+	\begin{enumerate}
+		\item Lo desacoplamos como hemos hecho hasta ahora y detenemos el contenedor
+		\begin{figure}[H]
+			\setlength{\abovecaptionskip}{0cm}
+			\setlength{\belowcaptionskip}{0cm}
+			\centering
+			\includegraphics[width=0.8\linewidth]{Recursos/stopDocker.png}
+		\end{figure}
+		\item Creamos la imagen nueva y reiniciamos el contenedor parado
+		\begin{figure}[H]
+			\setlength{\abovecaptionskip}{0cm}
+			\setlength{\belowcaptionskip}{0cm}
+			\centering
+			\includegraphics[width=0.8\linewidth]{Recursos/newDocker.png}
+		\end{figure}
+	\end{enumerate}
 	\clearpage
 	
 	\bibliographystyle{unsrt}
