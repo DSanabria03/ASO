@@ -170,7 +170,7 @@
 		\end{minipage}
 	\end{figure}
 	
-	Después, se nos exige investigar el fichero \verb|/proc/filesystems| donde se ubican los sistemas de ficheros que es capaz de entender el sistema.
+	Después, se nos exige investigar el fichero \verb|/proc/filesystems| donde se ubican los sistemas de ficheros que es capaz de entender el sistema. \label{filesystems}
 	\begin{figure}[H]
 		\centering
 		\begin{minipage}{0.28\textwidth}
@@ -787,7 +787,7 @@
 	
 	\subsection{Crontabd y atd}
 	\subsubsection{Crontabd}
-	Se trata de un servicio demonio que permite programar tareas automáticas para que se ejecuten de forma periódica. Para asignar un nueva tarea, lanzamos el comando \verb|crontab -e| donde indicamos primero cada cuanto se va a lanzar el script.
+	Se trata de un servicio demonio que permite programar tareas automáticas para que se ejecuten de forma periódica. Para asignar un nueva tarea, lanzamos el comando \verb|crontab -e| donde indicamos primero cada cuanto se va a lanzar el script. \label{cron}
 	\begin{figure}[H]
 		\setlength{\abovecaptionskip}{0cm}
 		\setlength{\belowcaptionskip}{0cm}
@@ -1217,8 +1217,169 @@
 	\end{figure}
 	
 	\clearpage
-	
+
 	\section{Monitorización}
+	\subsection{El sistema de archivos virtual /proc}
+	Se trata de pseudo sistema de ficheros que proporciona una interfaz con estructuras de datos del núcleo.  Se monta comúnmente en \verb|/proc|, por lo general, se monta automáticamente por el sistema, pero también se puede montar manualmente utilizando un comando como: \verb|mount -t proc proc /proc|. La mayoría de los archivos en el sistema de archivos \verb|proc| son de solo lectura, aunque hay ficheros que permiten escribir, por lo que se puede cambiar las variables del \verb|kernel| \cite{proc_man}. Este es un listado de todos los directorios y ficheros que contiene \verb|proc|:
+	\begin{figure}[H]
+		\setlength{\abovecaptionskip}{0cm}
+		\setlength{\belowcaptionskip}{0cm}
+		\centering
+		\includegraphics[width=\linewidth]{Recursos/proc.png}
+	\end{figure}
+	
+	Una vez que hemos determinado la función que desempeña \verb|/proc|, vamos a ver la información que nos proporciona los distintos ficheros y directorios que contiene:
+	\begin{itemize}
+		\item \verb|/proc/cpuinfo|: Obtenemos información acerca de la \verb|CPU|:
+		\begin{figure}[H]
+			\setlength{\abovecaptionskip}{0cm}
+			\setlength{\belowcaptionskip}{0cm}
+			\centering
+			\includegraphics[width=\linewidth]{Recursos/cpuinfo.png}
+		\end{figure}
+		Lo primero que se imprime, es el modelo del procesador y la cantidad de núcleos que están asignados a esta máquina. Además, podemos destacar la cantidad de \verb|flags| que se muestran, entre ellas, la \verb|flag hypervisor| que indica que estamos operando en un entorno virtualizado.
+		\item \verb|/proc/filesystems|: Lista de sistemas soportados por el núcleo actual. Ya se explicó este fichero en \ref{filesystems}:
+		\begin{figure}[H]
+			\setlength{\abovecaptionskip}{0cm}
+			\setlength{\belowcaptionskip}{0cm}
+			\centering
+			\includegraphics[width=0.4\linewidth]{Recursos/filesystems1.png}
+		\end{figure}
+		\item \verb|/proc/interrumpts|: Estadísticas actuales de las interrupciones:
+		\begin{figure}[H]
+			\setlength{\abovecaptionskip}{0cm}
+			\setlength{\belowcaptionskip}{0cm}
+			\centering
+			\includegraphics[width=0.75\linewidth]{Recursos/interrumpts.png}
+		\end{figure}
+		Se muestra el uso extensivo de \verb|drivers| paravirtualizados como \verb|virtio| con soporte \verb|MSI-X|, lo que permite distribuir la carga de interrupciones de E/S (Red/Disco) eficientemente entre los 4 núcleos lógicos.
+		\item \verb|/proc/meminfo|: Información detallada sobre el uso de memoria:
+		\begin{figure}[H]
+			\setlength{\abovecaptionskip}{0cm}
+			\setlength{\belowcaptionskip}{0cm}
+			\centering
+			\includegraphics[width=0.4\linewidth]{Recursos/meminfo.png}
+		\end{figure}
+		Como se puede observar, se cuenta con 6 GB de RAM física que ahora mismo está  en un estado de muy baja carga (aprox. 91\% de memoria disponible). No existe presión de memoria, evidenciado por el nulo uso de la partición Swap (0 kB usados). La caché de disco es relativamente baja (340 MB), indicando poca actividad reciente de E/S de ficheros.
+	\end{itemize}
+	
+	\subsection{Perfilado y traza de un proceso}
+	Para ver y determinar acerca de la ejecución de un programa en nuestro sistema, creamos un fichero en \verb|C| que se encargue de leer un fichero de entrada, la transforme (en este caso convirtiendo todos sus caracteres en mayúsculas) y escriba el resultado. El programa en \verb|C|, es el siguiente:
+	\begin{figure}[H]
+		\setlength{\abovecaptionskip}{0cm}
+		\setlength{\belowcaptionskip}{0cm}
+		\centering
+		\includegraphics[width=0.9\linewidth]{Recursos/procesamiento.png}
+	\end{figure}
+	
+	Ahora, para comprobar su funcionamiento correcto, habría que crear un fichero lo suficientemente grande como para ver el tiempo que tarda en ejecutarse, realizar un perfilado del programa, hacer una traza de llamadas de las llamadas al sistema que hace y determinar las bibliotecas dinámicas que se usan.
+	\begin{itemize}
+		\item \verb|time|: La ejecución del programa muestra un comportamiento limitado por procesador. De los 28.58 segundos totales de ejecución, 28.54 segundos se gastaron en modo usuario (cálculo puro), mientras que apenas 0.03 segundos se dedicaron a llamadas al sistema (E/S). La eficiencia del uso de CPU fue del 99\%, indicando que el proceso no sufrió bloqueos significativos por espera de disco (I/O Wait), lo cual es consistente con el bajo número de fallos de página (76 minor, 0 major).
+		\begin{figure}[H]
+			\setlength{\abovecaptionskip}{0cm}
+			\setlength{\belowcaptionskip}{0cm}
+			\centering
+			\includegraphics[width=0.9\linewidth]{Recursos/time.png}
+		\end{figure}
+		\item \verb|gprof|: El análisis de perfilado con \verb|gprof| identifica inequívocamente a la función tarea como el punto crítico de rendimiento, consumiendo el 99.58\% del tiempo de CPU (28.13 segundos).
+		\begin{figure}[H]
+			\setlength{\abovecaptionskip}{0cm}
+			\setlength{\belowcaptionskip}{0cm}
+			\centering
+			\includegraphics[width=0.9\linewidth]{Recursos/gprof.png}
+		\end{figure}
+		\item \verb|strace|: Se registraron 2,444 llamadas al sistema \verb|read| y 2,443 a \verb|write|. Además, \verb|openat| y \verb|close| reflejan no solo la apertura de los ficheros de datos del usuario, sino también la carga transparente de las bibliotecas dinámicas necesarias.\\
+		
+		Las operaciones de escritura consumieron la mayor parte del tiempo de sistema (30.07\%), seguidas por la apertura de ficheros, lo cual es consistente con un programa intensivo en E/S secuencial.
+		\begin{figure}[H]
+			\setlength{\abovecaptionskip}{0cm}
+			\setlength{\belowcaptionskip}{0cm}
+			\centering
+			\includegraphics[width=0.7\linewidth]{Recursos/strace.png}
+		\end{figure}
+		\item \verb|ldd|: El análisis de dependencias dinámicas mediante \verb|ldd| confirma que el binario no es estático, sino que depende de las bibliotecas compartidas del sistema. Para \verb|libc.so.6|, es la biblioteca estándar de C, necesaria para las funciones de E/S (\verb|stdio.h|) y manipulación de caracteres (\verb|ctype.h|). Para \verb|ld-linux-x86-64.so.2|, es el enlazador dinámico responsable de cargar las dependencias en tiempo de ejecución. Para \verb|linux-vdso.so.1| es la biblioteca virtual del kernel para optimizar llamadas al sistema (vDSO) sin cambio de contexto completo.
+		\begin{figure}[H]
+			\setlength{\abovecaptionskip}{0cm}
+			\setlength{\belowcaptionskip}{0cm}
+			\centering
+			\includegraphics[width=0.9\linewidth]{Recursos/ldd.png}
+		\end{figure}
+	\end{itemize}
+	\subsection{Monitorización}
+	Para terminar con esta parte, vamos a crear un \verb|script| que actúe como un monitor que guarde información del sistema cada 2 minutos. El \verb|script| es el siguiente:
+	\begin{figure}[H]
+		\setlength{\abovecaptionskip}{0cm}
+		\setlength{\belowcaptionskip}{0cm}
+		\centering
+		\includegraphics[width=0.9\linewidth]{Recursos/monitor.png}
+	\end{figure}
+	Le otorgamos permisos de ejecución como hemos hecho con el resto y como vimos en \ref{cron}, creamos una tarea que se irá ejecutando cada 2 minutos:
+	\begin{figure}[H]
+		\setlength{\abovecaptionskip}{0cm}
+		\setlength{\belowcaptionskip}{0cm}
+		\centering
+		\includegraphics[width=0.7\linewidth]{Recursos/crontabMonitor.png}
+	\end{figure}
+	
+	\subsubsection{SAR}
+	Se trata de una herramienta clásica de los sistemas \verb|UNIX| y \verb|GNU/Linux|, que se utiliza para recopilar, informar y guardar datos de la CPU, memoria y lectura/escritura del disco. El comando \verb|SAR| genera los informes sobre la marcha, además también se puede configurar para guardar dichos informes en ficheros de registro \cite{sar}.\\
+	
+	En mi caso, el comando \verb|SAR| ya venía instalado en mi máquina virtual, por lo que solo es necesario configurarlo para que se ejecute de la forma que piden:
+	\begin{itemize}
+		\item Lo primero es modificar el fichero de configuración de \verb|SAR| que se encuentra en \verb|/etc/default/sysstat| y activar la opción \verb|ENABLE| que habilita la recolección de datos:
+		\begin{figure}[H]
+			\setlength{\abovecaptionskip}{0cm}
+			\setlength{\belowcaptionskip}{0cm}
+			\centering
+			\includegraphics[width=0.8\linewidth]{Recursos/sysstat.png}
+		\end{figure}
+		Una vez guardados los cambios, reiniciamos el servicio:
+		\begin{figure}[H]
+			\setlength{\abovecaptionskip}{0cm}
+			\setlength{\belowcaptionskip}{0cm}
+			\centering
+			\includegraphics[width=0.8\linewidth]{Recursos/serviceSAR.png}
+		\end{figure}
+		\item Después, ejecutamos el comando \verb|sar -o datos.data 2 300| y esperamos 10 minutos. Para que se vea un poco de actividad, desde otra terminal se puede iniciar sesión y realizar tareas para que queden registradas:
+		\begin{figure}[H]
+			\setlength{\abovecaptionskip}{0cm}
+			\setlength{\belowcaptionskip}{0cm}
+			\centering
+			\includegraphics[width=0.75\linewidth]{Recursos/sarEx.png}
+		\end{figure}
+		\item Cuando haya terminado, veremos los resultados con \verb|sar -f| ya que se trata de un archivo binario y no se puede leer con un editor de texto.
+		\begin{itemize}
+			\item \verb|Uso de CPU|: Podemos ver cómo el sistema principalmente está en estado de reposo, ya que hay cerca de un 100\% de los recursos disponibles (\verb|idle|)
+			\begin{figure}[H]
+				\setlength{\abovecaptionskip}{0cm}
+				\setlength{\belowcaptionskip}{0cm}
+				\centering
+				\includegraphics[width=0.75\linewidth]{Recursos/cpuSAR.png}
+			\end{figure}
+			\item \verb|Longitud de la cola de procesos|: Relacionado con el punto anterior, el sistema se encuentra en un estado de inactividad. Esto se puede ver en la carga nula del sistema en ese momento (\verb|ldavg|):
+			\begin{figure}[H]
+				\setlength{\abovecaptionskip}{0cm}
+				\setlength{\belowcaptionskip}{0cm}
+				\centering
+				\includegraphics[width=0.75\linewidth]{Recursos/cargaSAR.png}
+			\end{figure}
+			\item \verb|Bloques leídos/escritos en disco|: En este caso, de pueden ver que no hay actividad de lectura en el disco y que hay escritura periódica en forma de ráfagas, coincidiendo con los ciclos de vaciado de buffers del sistema de archivos.
+			\begin{figure}[H]
+				\setlength{\abovecaptionskip}{0cm}
+				\setlength{\belowcaptionskip}{0cm}
+				\centering
+				\includegraphics[width=0.75\linewidth]{Recursos/esSAR.png}
+			\end{figure}
+			\item \verb|Actividad de Red|: Era de suponer que el sistema al estar inactivo, no hay apenas actividad de red
+			\begin{figure}[H]
+				\setlength{\abovecaptionskip}{0cm}
+				\setlength{\belowcaptionskip}{0cm}
+				\centering
+				\includegraphics[width=0.75\linewidth]{Recursos/redSAR.png}
+			\end{figure}
+		\end{itemize}
+	\end{itemize}
+	
 	
 	\clearpage
 	
